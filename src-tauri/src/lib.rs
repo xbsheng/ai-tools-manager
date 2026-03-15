@@ -68,6 +68,45 @@ fn registry_remove(name: String) -> Result<(), String> {
     registry::remove(&name).map_err(|e| e.to_string())
 }
 
+// --- Reveal path in file manager ---
+
+#[tauri::command]
+fn reveal_path(path: String) -> Result<(), String> {
+    let p = std::path::Path::new(&path);
+    let dir = if p.is_dir() {
+        p.to_path_buf()
+    } else {
+        p.parent()
+            .ok_or_else(|| format!("Cannot resolve parent of: {}", path))?
+            .to_path_buf()
+    };
+    if !dir.exists() {
+        return Err(format!("Path not found: {}", dir.display()));
+    }
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(&dir)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg(&dir)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&dir)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 // --- Skill commands ---
 
 #[tauri::command]
@@ -89,31 +128,7 @@ fn copy_skill(from: AiTool, to: AiTool, name: String) -> Result<(), String> {
 fn reveal_skill_path(tool: AiTool, name: String) -> Result<(), String> {
     let dir = skills::skills_dir(tool).map_err(|e| e.to_string())?;
     let path = dir.join(&name);
-    if !path.exists() {
-        return Err(format!("Skill directory not found: {}", path.display()));
-    }
-    #[cfg(target_os = "macos")]
-    {
-        std::process::Command::new("open")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| e.to_string())?;
-    }
-    #[cfg(target_os = "windows")]
-    {
-        std::process::Command::new("explorer")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| e.to_string())?;
-    }
-    #[cfg(target_os = "linux")]
-    {
-        std::process::Command::new("xdg-open")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| e.to_string())?;
-    }
-    Ok(())
+    reveal_path(path.to_string_lossy().to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -133,6 +148,7 @@ pub fn run() {
             remove_skill,
             copy_skill,
             reveal_skill_path,
+            reveal_path,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
