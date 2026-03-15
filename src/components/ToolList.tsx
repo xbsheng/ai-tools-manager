@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  ChevronDown,
   ChevronRight,
   CheckCircle,
   XCircle,
@@ -53,55 +52,53 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
           return (
             <div
               key={config.tool}
-              className="bg-bg-card border border-border rounded-xl overflow-hidden"
+              className="bg-bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.3)]"
             >
               <button
                 onClick={() => toggle(config.tool)}
-                className="w-full flex items-center justify-between p-4 hover:bg-bg-hover transition-colors"
+                className="w-full flex items-center justify-between p-4 hover:bg-bg-hover/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  {isExpanded ? (
-                    <ChevronDown size={18} />
-                  ) : (
-                    <ChevronRight size={18} />
-                  )}
+                  <div className="transition-transform duration-200" style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}>
+                    <ChevronRight size={16} className="text-text-secondary" />
+                  </div>
                   <span className="font-medium">
                     {TOOL_LABELS[config.tool]}
                   </span>
                   {config.installed ? (
-                    <CheckCircle size={16} className="text-success" />
+                    <CheckCircle size={15} className="text-success" />
                   ) : (
-                    <XCircle size={16} className="text-text-secondary" />
+                    <XCircle size={15} className="text-text-secondary/40" />
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-text-secondary text-sm">
-                  <Server size={14} />
-                  {config.servers.length} servers
+                <div className="flex items-center gap-2 text-text-secondary text-xs">
+                  <Server size={13} />
+                  {config.servers.length} server{config.servers.length !== 1 ? "s" : ""}
                 </div>
               </button>
 
               {isExpanded && (
-                <div className="border-t border-border p-4 bg-bg-primary/50">
-                  <div className="text-xs text-text-secondary mb-3">
-                    Config: {config.config_path}
+                <div className="border-t border-border px-4 py-3 bg-bg-primary/40 animate-slide-up">
+                  <div className="text-[11px] text-text-secondary/60 font-mono mb-3 truncate">
+                    {config.config_path}
                   </div>
 
                   {config.servers.length === 0 ? (
-                    <p className="text-sm text-text-secondary">
+                    <p className="text-sm text-text-secondary/60 py-2">
                       No MCP servers configured
                     </p>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {config.servers.map((server) => (
                         <div
                           key={server.name}
-                          className="flex items-center justify-between bg-bg-secondary rounded-lg p-3"
+                          className="group flex items-center justify-between bg-bg-secondary/80 rounded-lg p-3 border border-transparent hover:border-border/50 transition-colors"
                         >
-                          <div>
+                          <div className="min-w-0">
                             <div className="font-medium text-sm">
                               {server.name}
                             </div>
-                            <div className="text-xs text-text-secondary mt-0.5">
+                            <div className="text-xs text-text-secondary mt-0.5 truncate font-mono">
                               {server.command
                                 ? `${server.command} ${server.args.join(" ")}`
                                 : server.url || ""}
@@ -111,9 +108,9 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
                             onClick={() =>
                               handleRemove(config.tool, server.name)
                             }
-                            className="p-1.5 rounded hover:bg-danger/20 text-text-secondary hover:text-danger transition-colors"
+                            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200 shrink-0 ml-2"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={13} />
                           </button>
                         </div>
                       ))}
@@ -123,9 +120,9 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
                   {config.installed && (
                     <button
                       onClick={() => setAddingTo(config.tool)}
-                      className="mt-3 flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors"
+                      className="mt-3 flex items-center gap-1.5 text-xs text-accent hover:text-accent-hover transition-colors"
                     >
-                      <Plus size={14} />
+                      <Plus size={13} />
                       Add Server
                     </button>
                   )}

@@ -67,3 +67,17 @@ export async function syncServers(
 ): Promise<SyncResult> {
   return invoke("sync_servers", { from, to, names });
 }
+
+// --- Registry (local favorites) ---
+
+export async function registryList(): Promise<McpServer[]> {
+  return invoke("registry_list");
+}
+
+export async function registryAdd(server: McpServer): Promise<void> {
+  return invoke("registry_add", { server });
+}
+
+export async function registryRemove(name: string): Promise<void> {
+  return invoke("registry_remove", { name });
+}

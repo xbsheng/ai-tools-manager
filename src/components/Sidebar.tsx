@@ -28,29 +28,39 @@ export function Sidebar({
   serverCount,
 }: SidebarProps) {
   return (
-    <aside className="w-60 bg-bg-secondary border-r border-border flex flex-col">
+    <aside className="relative w-60 bg-bg-secondary border-r border-border flex flex-col z-10">
       <div className="p-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <LayoutDashboard size={20} className="text-accent" />
-          <h1 className="font-semibold text-lg">ATM</h1>
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 rounded-lg bg-accent/15">
+            <LayoutDashboard size={18} className="text-accent" />
+          </div>
+          <div>
+            <h1 className="font-semibold text-sm leading-none">ATM</h1>
+            <p className="text-[11px] text-text-secondary mt-0.5">
+              AI Tools Manager
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-text-secondary mt-1">AI Tools Manager</p>
       </div>
 
       <div className="p-3 border-b border-border">
         <div className="grid grid-cols-2 gap-2 text-center">
-          <div className="bg-bg-card rounded-lg p-2">
-            <div className="text-lg font-bold text-accent">{toolCount}</div>
-            <div className="text-xs text-text-secondary">Tools</div>
+          <div className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50">
+            <div className="text-lg font-bold text-accent leading-none">
+              {toolCount}
+            </div>
+            <div className="text-[11px] text-text-secondary mt-1">Tools</div>
           </div>
-          <div className="bg-bg-card rounded-lg p-2">
-            <div className="text-lg font-bold text-accent">{serverCount}</div>
-            <div className="text-xs text-text-secondary">Servers</div>
+          <div className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50">
+            <div className="text-lg font-bold text-accent leading-none">
+              {serverCount}
+            </div>
+            <div className="text-[11px] text-text-secondary mt-1">Servers</div>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 p-2">
+      <nav className="flex-1 p-2 space-y-0.5">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const active = view === item.id;
@@ -58,21 +68,23 @@ export function Sidebar({
             <button
               key={item.id}
               onClick={() => onViewChange(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                 active
-                  ? "bg-accent/15 text-accent"
-                  : "text-text-secondary hover:bg-bg-hover hover:text-text-primary"
+                  ? "bg-accent/12 text-accent shadow-[inset_3px_0_0_0_var(--color-accent)]"
+                  : "text-text-secondary hover:bg-bg-hover hover:text-text-primary active:scale-[0.98]"
               }`}
             >
-              <Icon size={18} />
-              {item.label}
+              <Icon size={17} strokeWidth={active ? 2.2 : 1.8} />
+              <span className={active ? "font-medium" : ""}>{item.label}</span>
             </button>
           );
         })}
       </nav>
 
       <div className="p-3 border-t border-border">
-        <p className="text-xs text-text-secondary text-center">v0.1.0</p>
+        <p className="text-[11px] text-text-secondary/60 text-center">
+          v0.1.0
+        </p>
       </div>
     </aside>
   );

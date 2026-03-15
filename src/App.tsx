@@ -41,7 +41,10 @@ export default function App() {
     >
       {loading ? (
         <div className="flex items-center justify-center h-full">
-          <div className="text-text-secondary">Loading...</div>
+          <div className="flex items-center gap-2 text-text-secondary text-sm">
+            <div className="w-4 h-4 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+            Loading...
+          </div>
         </div>
       ) : (
         <>

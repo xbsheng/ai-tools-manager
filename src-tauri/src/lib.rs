@@ -1,5 +1,5 @@
 use atm_core::models::{AiTool, McpServer, SyncResult, ToolConfig};
-use atm_core::{sync, tools};
+use atm_core::{registry, sync, tools};
 use std::collections::HashMap;
 
 #[tauri::command]
@@ -51,6 +51,23 @@ fn sync_servers(
     }
 }
 
+// --- Registry commands (local favorites) ---
+
+#[tauri::command]
+fn registry_list() -> Result<Vec<McpServer>, String> {
+    registry::list().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn registry_add(server: McpServer) -> Result<(), String> {
+    registry::add(&server).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn registry_remove(name: String) -> Result<(), String> {
+    registry::remove(&name).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -61,6 +78,9 @@ pub fn run() {
             add_server,
             remove_server,
             sync_servers,
+            registry_list,
+            registry_add,
+            registry_remove,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

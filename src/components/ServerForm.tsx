@@ -1,31 +1,129 @@
-import { useState } from "react";
-import { X } from "lucide-react";
-import { AiTool, TOOL_LABELS, McpServer, addServer } from "../hooks/useTauri";
+import { useState, useEffect, useRef } from "react";
+import { X, Terminal, Globe, FileJson } from "lucide-react";
+import {
+  AiTool,
+  TOOL_LABELS,
+  McpServer,
+  ToolConfig,
+  addServer,
+  registryAdd,
+} from "../hooks/useTauri";
+import { JsonEditor } from "./JsonEditor";
+
+type InputMode = "command" | "url" | "json";
 
 interface ServerFormProps {
-  tool: AiTool;
+  tool?: AiTool;
+  installedTools?: ToolConfig[];
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function ServerForm({ tool, onClose, onSaved }: ServerFormProps) {
+function parseJsonConfig(
+  raw: string,
+): { server: McpServer; nameFromKey?: string } | string {
+  try {
+    const parsed = JSON.parse(raw.trim());
+
+    const topKeys = Object.keys(parsed);
+    if (
+      topKeys.length === 1 &&
+      typeof parsed[topKeys[0]] === "object" &&
+      !Array.isArray(parsed[topKeys[0]]) &&
+      (parsed[topKeys[0]].command || parsed[topKeys[0]].url)
+    ) {
+      const nameFromKey = topKeys[0];
+      const obj = parsed[nameFromKey];
+      return {
+        nameFromKey,
+        server: {
+          name: nameFromKey,
+          command: obj.command || undefined,
+          url: obj.url || undefined,
+          args: Array.isArray(obj.args) ? obj.args.map(String) : [],
+          env:
+            obj.env && typeof obj.env === "object"
+              ? Object.fromEntries(
+                  Object.entries(obj.env).map(([k, v]) => [k, String(v)]),
+                )
+              : {},
+        },
+      };
+    }
+
+    if (parsed.command || parsed.url) {
+      return {
+        server: {
+          name: "",
+          command: parsed.command || undefined,
+          url: parsed.url || undefined,
+          args: Array.isArray(parsed.args) ? parsed.args.map(String) : [],
+          env:
+            parsed.env && typeof parsed.env === "object"
+              ? Object.fromEntries(
+                  Object.entries(parsed.env).map(([k, v]) => [k, String(v)]),
+                )
+              : {},
+        },
+      };
+    }
+
+    return "JSON must contain a 'command' or 'url' field";
+  } catch {
+    return "Invalid JSON format";
+  }
+}
+
+export function ServerForm({
+  tool,
+  installedTools,
+  onClose,
+  onSaved,
+}: ServerFormProps) {
+  const [mode, setMode] = useState<InputMode>("command");
   const [name, setName] = useState("");
   const [command, setCommand] = useState("");
   const [url, setUrl] = useState("");
   const [args, setArgs] = useState("");
   const [env, setEnv] = useState("");
+  const [jsonText, setJsonText] = useState("");
+  const [selectedTools, setSelectedTools] = useState<Set<AiTool>>(
+    tool ? new Set([tool]) : new Set(),
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const backdropRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const multiMode = !tool && installedTools;
+
+  // Escape key to close
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const toggleTool = (t: AiTool) => {
+    const next = new Set(selectedTools);
+    if (next.has(t)) next.delete(t);
+    else next.add(t);
+    setSelectedTools(next);
+  };
+
+  const buildServerFromForm = (): McpServer | null => {
     if (!name.trim()) {
       setError("Name is required");
-      return;
+      return null;
     }
-    if (!command.trim() && !url.trim()) {
-      setError("Either command or URL is required");
-      return;
+    if (mode === "command" && !command.trim()) {
+      setError("Command is required");
+      return null;
+    }
+    if (mode === "url" && !url.trim()) {
+      setError("URL is required");
+      return null;
     }
 
     const envMap: Record<string, string> = {};
@@ -38,20 +136,65 @@ export function ServerForm({ tool, onClose, onSaved }: ServerFormProps) {
       }
     }
 
-    const server: McpServer = {
+    return {
       name: name.trim(),
-      command: command.trim() || undefined,
-      url: url.trim() || undefined,
-      args: args
-        .trim()
-        .split(/\s+/)
-        .filter((a) => a),
+      command: mode === "command" ? command.trim() || undefined : undefined,
+      url: mode === "url" ? url.trim() || undefined : undefined,
+      args:
+        mode === "command"
+          ? args
+              .trim()
+              .split(/\s+/)
+              .filter((a) => a)
+          : [],
       env: envMap,
     };
+  };
+
+  const buildServerFromJson = (): McpServer | null => {
+    if (!jsonText.trim()) {
+      setError("Paste JSON configuration");
+      return null;
+    }
+
+    const result = parseJsonConfig(jsonText);
+    if (typeof result === "string") {
+      setError(result);
+      return null;
+    }
+
+    const server = result.server;
+    if (name.trim()) {
+      server.name = name.trim();
+    }
+    if (!server.name) {
+      setError("Name is required — provide it above or use keyed JSON format");
+      return null;
+    }
+    return server;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    const server =
+      mode === "json" ? buildServerFromJson() : buildServerFromForm();
+    if (!server) return;
+
+    if (!multiMode && selectedTools.size === 0) {
+      setError("Select at least one tool");
+      return;
+    }
 
     setSaving(true);
     try {
-      await addServer(tool, server);
+      if (multiMode) {
+        await registryAdd(server);
+      }
+      for (const t of selectedTools) {
+        await addServer(t, server);
+      }
       onSaved();
     } catch (e) {
       setError(String(e));
@@ -60,101 +203,214 @@ export function ServerForm({ tool, onClose, onSaved }: ServerFormProps) {
     }
   };
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === backdropRef.current) onClose();
+  };
+
+  const title = tool
+    ? `Add Server to ${TOOL_LABELS[tool]}`
+    : "Add MCP Server";
+
+  const modes: { key: InputMode; label: string; icon: typeof Terminal }[] = [
+    { key: "command", label: "Command", icon: Terminal },
+    { key: "url", label: "URL", icon: Globe },
+    { key: "json", label: "JSON", icon: FileJson },
+  ];
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-bg-secondary border border-border rounded-xl w-full max-w-md mx-4">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h3 className="font-semibold">
-            Add Server to {TOOL_LABELS[tool]}
-          </h3>
+    <div
+      ref={backdropRef}
+      onClick={handleBackdropClick}
+      className="fixed inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-50 animate-fade-in"
+    >
+      <div className="bg-bg-secondary border border-white/[0.08] rounded-xl w-full max-w-md mx-4 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)] animate-modal-in">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h3 className="font-semibold text-[15px]">{title}</h3>
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-bg-hover transition-colors"
+            className="p-1 rounded-md hover:bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="px-5 py-4 space-y-4 max-h-[70vh] overflow-y-auto"
+        >
           {error && (
-            <div className="text-sm text-danger bg-danger/10 rounded-lg p-2">
+            <div className="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
               {error}
             </div>
           )}
 
+          {/* Mode selector */}
+          <div className="flex gap-1 p-1 bg-bg-primary/80 rounded-lg border border-border/50">
+            {modes.map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  setMode(key);
+                  setError("");
+                }}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all duration-200 ${
+                  mode === key
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(99,102,241,0.1)]"
+                    : "text-text-secondary hover:text-text-primary hover:bg-bg-hover border border-transparent"
+                }`}
+              >
+                <Icon size={13} />
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Name field */}
           <div>
-            <label className="block text-sm text-text-secondary mb-1">
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">
               Name
+              {mode === "json" && (
+                <span className="text-text-secondary/50 font-normal ml-1">
+                  (auto-detected from JSON key)
+                </span>
+              )}
             </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
-              placeholder="my-server"
+              className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-200"
+              placeholder={
+                mode === "json" ? "optional — extracted from JSON" : "my-server"
+              }
             />
           </div>
 
-          <div>
-            <label className="block text-sm text-text-secondary mb-1">
-              Command
-            </label>
-            <input
-              value={command}
-              onChange={(e) => setCommand(e.target.value)}
-              className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
-              placeholder="npx"
-            />
-          </div>
+          {/* Command mode */}
+          {mode === "command" && (
+            <>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                  Command
+                </label>
+                <input
+                  value={command}
+                  onChange={(e) => setCommand(e.target.value)}
+                  className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-200"
+                  placeholder="npx"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm text-text-secondary mb-1">
-              URL (alternative to command)
-            </label>
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
-              placeholder="http://localhost:3000/sse"
-            />
-          </div>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                  Arguments
+                  <span className="text-text-secondary/50 font-normal ml-1">
+                    (space-separated)
+                  </span>
+                </label>
+                <input
+                  value={args}
+                  onChange={(e) => setArgs(e.target.value)}
+                  className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-200"
+                  placeholder="-y @modelcontextprotocol/server-filesystem"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm text-text-secondary mb-1">
-              Arguments (space-separated)
-            </label>
-            <input
-              value={args}
-              onChange={(e) => setArgs(e.target.value)}
-              className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
-              placeholder="-y @modelcontextprotocol/server-filesystem"
-            />
-          </div>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                  Environment
+                  <span className="text-text-secondary/50 font-normal ml-1">
+                    (KEY=VALUE per line)
+                  </span>
+                </label>
+                <textarea
+                  value={env}
+                  onChange={(e) => setEnv(e.target.value)}
+                  className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-200 resize-none"
+                  rows={3}
+                  placeholder={"API_KEY=xxx\nDEBUG=true"}
+                />
+              </div>
+            </>
+          )}
 
-          <div>
-            <label className="block text-sm text-text-secondary mb-1">
-              Environment (KEY=VALUE, one per line)
-            </label>
-            <textarea
-              value={env}
-              onChange={(e) => setEnv(e.target.value)}
-              className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent resize-none"
-              rows={3}
-              placeholder={"API_KEY=xxx\nDEBUG=true"}
-            />
-          </div>
+          {/* URL mode */}
+          {mode === "url" && (
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                URL
+              </label>
+              <input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-200"
+                placeholder="http://localhost:3000/sse"
+              />
+            </div>
+          )}
 
-          <div className="flex justify-end gap-2 pt-2">
+          {/* JSON mode */}
+          {mode === "json" && (
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                JSON Configuration
+              </label>
+              <JsonEditor
+                value={jsonText}
+                onChange={setJsonText}
+                rows={8}
+                placeholder={`{
+  "command": "npx",
+  "args": ["-y", "some-mcp-server"],
+  "env": {
+    "API_KEY": "xxx"
+  }
+}`}
+              />
+            </div>
+          )}
+
+          {multiMode && (
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-2">
+                Add to tools
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {installedTools
+                  .filter((c) => c.installed)
+                  .map((c) => {
+                    const active = selectedTools.has(c.tool);
+                    return (
+                      <button
+                        key={c.tool}
+                        type="button"
+                        onClick={() => toggleTool(c.tool)}
+                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 ${
+                          active
+                            ? "border-accent/40 bg-accent/15 text-accent"
+                            : "border-border text-text-secondary hover:bg-bg-hover hover:border-border"
+                        }`}
+                      >
+                        {TOOL_LABELS[c.tool]}
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-border/50">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg border border-border hover:bg-bg-hover transition-colors"
+              className="px-4 py-2 text-sm rounded-lg border border-border hover:bg-bg-hover active:scale-[0.98] transition-all duration-200"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-50 shadow-[0_0_0_1px_rgba(99,102,241,0.5),0_2px_8px_rgba(99,102,241,0.25)]"
             >
               {saving ? "Adding..." : "Add Server"}
             </button>
