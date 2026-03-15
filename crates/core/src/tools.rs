@@ -106,3 +106,13 @@ pub fn remove_server(tool: AiTool, name: &str) -> Result<()> {
         anyhow::bail!("Server '{}' not found in any {} config", name, tool)
     }
 }
+
+pub fn has_backup(tool: AiTool) -> Result<bool> {
+    let path = config_path(tool)?;
+    Ok(config::has_backup(&path))
+}
+
+pub fn restore_backup(tool: AiTool) -> Result<()> {
+    let path = config_path(tool)?;
+    config::restore_backup(&path)
+}

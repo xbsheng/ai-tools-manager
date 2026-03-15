@@ -141,6 +141,11 @@ export const zh: Record<TranslationKey, string> = {
   downloadUpdate: "前往下载",
   updateCheckFailed: "检查失败",
 
+  // Backup & Restore
+  restoreBackup: "恢复备份",
+  confirmRestore: "将「{tool}」的配置恢复到上一次备份？",
+  restoreSuccess: "已恢复备份",
+
   // JsonEditor
   valid: "有效",
   linesCount: "{count} 行",

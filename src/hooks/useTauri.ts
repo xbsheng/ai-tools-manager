@@ -138,3 +138,13 @@ export async function revealPath(path: string): Promise<void> {
 export async function openFile(path: string): Promise<void> {
   return invoke("open_file", { path });
 }
+
+// --- Backup / Restore ---
+
+export async function hasBackup(tool: AiTool): Promise<boolean> {
+  return invoke("has_backup", { tool });
+}
+
+export async function restoreBackup(tool: AiTool): Promise<void> {
+  return invoke("restore_backup", { tool });
+}

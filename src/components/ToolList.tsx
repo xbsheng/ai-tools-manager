@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ChevronRight,
   CheckCircle,
@@ -8,6 +8,7 @@ import {
   Trash2,
   FolderOpen,
   FileText,
+  Undo2,
 } from "lucide-react";
 import {
   ToolConfig,
@@ -15,6 +16,8 @@ import {
   removeServer,
   revealPath,
   openFile,
+  hasBackup,
+  restoreBackup,
   AiTool,
 } from "../hooks/useTauri";
 import { ServerForm } from "./ServerForm";
@@ -35,7 +38,21 @@ export function ToolList({ tools, onRefresh, showToast }: ToolListProps) {
     tool: AiTool;
     name: string;
   } | null>(null);
+  const [confirmRestore, setConfirmRestore] = useState<AiTool | null>(null);
+  const [backupMap, setBackupMap] = useState<Record<string, boolean>>({});
   const t = useI18n();
+
+  const refreshBackups = useCallback(() => {
+    for (const config of tools) {
+      hasBackup(config.tool).then((has) =>
+        setBackupMap((prev) => ({ ...prev, [config.tool]: has })),
+      );
+    }
+  }, [tools]);
+
+  useEffect(() => {
+    refreshBackups();
+  }, [refreshBackups]);
 
   const toggle = (tool: string) => {
     const next = new Set(expanded);
@@ -49,6 +66,17 @@ export function ToolList({ tools, onRefresh, showToast }: ToolListProps) {
       await removeServer(tool, name);
       onRefresh();
       showToast("success", t("deletedServer", { name }));
+    } catch (e) {
+      showToast("error", t("operationFailed", { error: String(e) }));
+    }
+  };
+
+  const handleRestore = async (tool: AiTool) => {
+    try {
+      await restoreBackup(tool);
+      onRefresh();
+      refreshBackups();
+      showToast("success", t("restoreSuccess"));
     } catch (e) {
       showToast("error", t("operationFailed", { error: String(e) }));
     }
@@ -119,6 +147,16 @@ export function ToolList({ tools, onRefresh, showToast }: ToolListProps) {
                     >
                       <FileText size={12} />
                     </button>
+                    {backupMap[config.tool] && (
+                      <button
+                        onClick={() => setConfirmRestore(config.tool)}
+                        className="p-1 rounded-md hover:bg-accent/15 text-text-secondary/40 hover:text-accent transition-all duration-200 shrink-0"
+                        aria-label={t("restoreBackup")}
+                        title={t("restoreBackup")}
+                      >
+                        <Undo2 size={12} />
+                      </button>
+                    )}
                   </div>
 
                   {config.servers.length === 0 ? (
@@ -195,6 +233,19 @@ export function ToolList({ tools, onRefresh, showToast }: ToolListProps) {
             setConfirmDelete(null);
           }}
           onCancel={() => setConfirmDelete(null)}
+        />
+      )}
+
+      {confirmRestore && (
+        <ConfirmDialog
+          message={t("confirmRestore", {
+            tool: TOOL_LABELS[confirmRestore],
+          })}
+          onConfirm={() => {
+            handleRestore(confirmRestore);
+            setConfirmRestore(null);
+          }}
+          onCancel={() => setConfirmRestore(null)}
         />
       )}
     </div>

@@ -68,6 +68,18 @@ fn registry_remove(name: String) -> Result<(), String> {
     registry::remove(&name).map_err(|e| e.to_string())
 }
 
+// --- Backup / Restore ---
+
+#[tauri::command]
+fn has_backup(tool: AiTool) -> Result<bool, String> {
+    tools::has_backup(tool).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn restore_backup(tool: AiTool) -> Result<(), String> {
+    tools::restore_backup(tool).map_err(|e| e.to_string())
+}
+
 // --- Reveal path in file manager ---
 
 #[tauri::command]
@@ -180,6 +192,8 @@ pub fn run() {
             remove_skill,
             copy_skill,
             reveal_skill_path,
+            has_backup,
+            restore_backup,
             reveal_path,
             open_file,
         ])

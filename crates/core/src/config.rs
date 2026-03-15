@@ -3,7 +3,7 @@ use anyhow::{Context, Result};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 fn mcp_servers_key(tool: AiTool) -> &'static str {
     match tool {
@@ -22,11 +22,41 @@ fn read_json(path: &Path) -> Result<Value> {
 }
 
 fn write_json(path: &Path, value: &Value) -> Result<()> {
+    if path.exists() {
+        let backup = backup_path(path);
+        fs::copy(path, &backup)
+            .with_context(|| format!("Failed to backup: {}", path.display()))?;
+    }
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
     let content = serde_json::to_string_pretty(value)?;
     fs::write(path, content).with_context(|| format!("Failed to write: {}", path.display()))
+}
+
+/// Returns the backup path for a config file: `foo.json` → `foo.json.bak`
+pub fn backup_path(path: &Path) -> PathBuf {
+    let mut bak = path.as_os_str().to_owned();
+    bak.push(".bak");
+    PathBuf::from(bak)
+}
+
+/// Checks whether a `.bak` backup exists for the given path.
+pub fn has_backup(path: &Path) -> bool {
+    backup_path(path).exists()
+}
+
+/// Restores the `.bak` file over the original, then removes the `.bak`.
+pub fn restore_backup(path: &Path) -> Result<()> {
+    let bak = backup_path(path);
+    if !bak.exists() {
+        anyhow::bail!("No backup found for: {}", path.display());
+    }
+    fs::copy(&bak, path)
+        .with_context(|| format!("Failed to restore backup: {}", path.display()))?;
+    fs::remove_file(&bak)
+        .with_context(|| format!("Failed to remove backup: {}", bak.display()))?;
+    Ok(())
 }
 
 fn parse_server(name: &str, value: &Value) -> McpServer {

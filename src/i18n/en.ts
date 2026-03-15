@@ -139,6 +139,11 @@ export const en = {
   downloadUpdate: "Download",
   updateCheckFailed: "Check failed",
 
+  // Backup & Restore
+  restoreBackup: "Restore backup",
+  confirmRestore: "Restore \"{tool}\" config to the previous backup?",
+  restoreSuccess: "Backup restored",
+
   // JsonEditor
   valid: "Valid",
   linesCount: "{count} lines",
