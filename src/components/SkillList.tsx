@@ -149,7 +149,7 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-bg-card border border-border rounded-lg pl-9 pr-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(77,120,204,0.1)] transition-all duration-200"
+              className="w-full bg-bg-card border border-border rounded-lg pl-9 pr-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
               placeholder={t("searchSkills")}
               aria-label={t("searchSkills")}
             />
@@ -178,7 +178,7 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
           {filtered.map((skill) => (
             <div
               key={skill.name}
-              className="group bg-bg-card border border-border rounded-xl p-4 transition-all duration-200 hover:border-border hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.4),0_0_40px_rgba(77,120,204,0.04)]"
+              className="group bg-bg-card border border-border rounded-xl p-4 transition-all duration-200 hover:border-border hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.4),0_0_40px_rgba(94,106,210,0.04)]"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">

@@ -161,7 +161,7 @@ export function JsonEditor({
       : "border-red-500/40";
   const focusBorder = focused
     ? validation.valid || !value.trim()
-      ? "border-accent/60 shadow-[0_0_0_3px_rgba(77,120,204,0.1)]"
+      ? "border-accent/60 shadow-[0_0_0_3px_rgba(94,106,210,0.1)]"
       : "border-red-500/60 shadow-[0_0_0_3px_rgba(239,68,68,0.08)]"
     : "";
 

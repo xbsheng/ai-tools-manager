@@ -99,7 +99,7 @@ export function ToolList({ tools, onRefresh, showToast }: ToolListProps) {
           return (
             <div
               key={config.tool}
-              className="bg-bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.4),0_0_40px_rgba(77,120,204,0.04)]"
+              className="bg-bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.4),0_0_40px_rgba(94,106,210,0.04)]"
             >
               <button
                 onClick={() => toggle(config.tool)}
