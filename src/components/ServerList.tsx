@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { Server, Trash2, Plus, Check } from "lucide-react";
+import { Server, Trash2, Plus, Check, Edit2 } from "lucide-react";
 import {
   ToolConfig,
   TOOL_LABELS,
@@ -10,7 +10,7 @@ import {
   registryList,
   registryRemove,
 } from "../hooks/useTauri";
-import { ServerForm } from "./ServerForm";
+import { ServerForm, EditingServer } from "./ServerForm";
 import { useI18n } from "../i18n";
 
 interface ServerListProps {
@@ -29,6 +29,7 @@ interface UnifiedServer {
 
 export function ServerList({ tools, onRefresh }: ServerListProps) {
   const [showForm, setShowForm] = useState(false);
+  const [editingServer, setEditingServer] = useState<EditingServer | null>(null);
   const [registryServers, setRegistryServers] = useState<McpServer[]>([]);
   const t = useI18n();
 
@@ -118,8 +119,24 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
     }
   };
 
+  const handleEdit = (server: UnifiedServer) => {
+    setEditingServer({
+      name: server.name,
+      server: {
+        name: server.name,
+        command: server.command,
+        url: server.url,
+        args: server.args,
+        env: server.env,
+      },
+      tools: server.tools,
+    });
+    setShowForm(true);
+  };
+
   const handleServerAdded = async () => {
     setShowForm(false);
+    setEditingServer(null);
     await loadRegistry();
     onRefresh();
   };
@@ -201,13 +218,22 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleDelete(server)}
-                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200 ml-3 shrink-0"
-                  title={t("deleteServer")}
-                >
-                  <Trash2 size={15} />
-                </button>
+                <div className="flex items-center gap-1 ml-3 shrink-0">
+                  <button
+                    onClick={() => handleEdit(server)}
+                    className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-accent/15 text-text-secondary hover:text-accent transition-all duration-200"
+                    title={t("editMcpServer")}
+                  >
+                    <Edit2 size={15} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(server)}
+                    className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200"
+                    title={t("deleteServer")}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -217,7 +243,11 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
       {showForm && (
         <ServerForm
           installedTools={tools}
-          onClose={() => setShowForm(false)}
+          editingServer={editingServer ?? undefined}
+          onClose={() => {
+            setShowForm(false);
+            setEditingServer(null);
+          }}
           onSaved={handleServerAdded}
         />
       )}

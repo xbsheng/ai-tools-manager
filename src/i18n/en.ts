@@ -68,8 +68,11 @@ export const en = {
   environmentHint: "(KEY=VALUE per line)",
   jsonConfiguration: "JSON Configuration",
   addToTools: "Add to tools",
+  editMcpServer: "Edit MCP Server",
   cancel: "Cancel",
   adding: "Adding...",
+  saving: "Saving...",
+  save: "Save",
 
   // ServerForm errors
   errorNameRequired: "Name is required",

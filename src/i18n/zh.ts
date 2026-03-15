@@ -70,8 +70,11 @@ export const zh: Record<TranslationKey, string> = {
   environmentHint: "（每行 KEY=VALUE）",
   jsonConfiguration: "JSON 配置",
   addToTools: "添加到工具",
+  editMcpServer: "编辑 MCP 服务器",
   cancel: "取消",
   adding: "添加中...",
+  saving: "保存中...",
+  save: "保存",
 
   // ServerForm errors
   errorNameRequired: "名称为必填项",

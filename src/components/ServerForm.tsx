@@ -6,16 +6,25 @@ import {
   McpServer,
   ToolConfig,
   addServer,
+  removeServer,
   registryAdd,
+  registryRemove,
 } from "../hooks/useTauri";
 import { JsonEditor } from "./JsonEditor";
 import { useI18n } from "../i18n";
 
 type InputMode = "command" | "url" | "json";
 
+export interface EditingServer {
+  name: string;
+  server: McpServer;
+  tools: AiTool[];
+}
+
 interface ServerFormProps {
   tool?: AiTool;
   installedTools?: ToolConfig[];
+  editingServer?: EditingServer;
   onClose: () => void;
   onSaved: () => void;
 }
@@ -78,19 +87,36 @@ function parseJsonConfig(
 export function ServerForm({
   tool,
   installedTools,
+  editingServer,
   onClose,
   onSaved,
 }: ServerFormProps) {
-  const [mode, setMode] = useState<InputMode>("command");
-  const [name, setName] = useState("");
-  const [command, setCommand] = useState("");
-  const [url, setUrl] = useState("");
-  const [args, setArgs] = useState("");
-  const [env, setEnv] = useState("");
+  const isEdit = !!editingServer;
+
+  const [mode, setMode] = useState<InputMode>(() => {
+    if (editingServer) {
+      return editingServer.server.url ? "url" : "command";
+    }
+    return "command";
+  });
+  const [name, setName] = useState(() => editingServer?.server.name ?? "");
+  const [command, setCommand] = useState(() => editingServer?.server.command ?? "");
+  const [url, setUrl] = useState(() => editingServer?.server.url ?? "");
+  const [args, setArgs] = useState(() => editingServer?.server.args.join(" ") ?? "");
+  const [env, setEnv] = useState(() => {
+    if (editingServer) {
+      return Object.entries(editingServer.server.env)
+        .map(([k, v]) => `${k}=${v}`)
+        .join("\n");
+    }
+    return "";
+  });
   const [jsonText, setJsonText] = useState("");
-  const [selectedTools, setSelectedTools] = useState<Set<AiTool>>(
-    tool ? new Set([tool]) : new Set(),
-  );
+  const [selectedTools, setSelectedTools] = useState<Set<AiTool>>(() => {
+    if (editingServer) return new Set(editingServer.tools);
+    if (tool) return new Set([tool]);
+    return new Set();
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -191,11 +217,25 @@ export function ServerForm({
 
     setSaving(true);
     try {
-      if (multiMode) {
+      if (isEdit && editingServer) {
+        // Remove old server from all tools that had it
+        for (const oldTool of editingServer.tools) {
+          await removeServer(oldTool, editingServer.name);
+        }
+        // Remove old from registry, add updated
+        await registryRemove(editingServer.name);
         await registryAdd(server);
-      }
-      for (const tl of selectedTools) {
-        await addServer(tl, server);
+        // Add updated server to all selected tools
+        for (const tl of selectedTools) {
+          await addServer(tl, server);
+        }
+      } else {
+        if (multiMode) {
+          await registryAdd(server);
+        }
+        for (const tl of selectedTools) {
+          await addServer(tl, server);
+        }
       }
       onSaved();
     } catch (e) {
@@ -209,9 +249,11 @@ export function ServerForm({
     if (e.target === backdropRef.current) onClose();
   };
 
-  const title = tool
-    ? t("addServerTo", { tool: TOOL_LABELS[tool] })
-    : t("addMcpServer");
+  const title = isEdit
+    ? t("editMcpServer")
+    : tool
+      ? t("addServerTo", { tool: TOOL_LABELS[tool] })
+      : t("addMcpServer");
 
   const modes: { key: InputMode; labelKey: "command" | "url" | "json"; icon: typeof Terminal }[] = [
     { key: "command", labelKey: "command", icon: Terminal },
@@ -414,7 +456,9 @@ export function ServerForm({
               disabled={saving}
               className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-50 shadow-[0_0_0_1px_rgba(99,102,241,0.5),0_2px_8px_rgba(99,102,241,0.25)]"
             >
-              {saving ? t("adding") : t("addServer")}
+              {saving
+                ? (isEdit ? t("saving") : t("adding"))
+                : (isEdit ? t("save") : t("addServer"))}
             </button>
           </div>
         </form>
