@@ -1,4 +1,4 @@
-use atm_core::models::{AiTool, McpServer, Skill, SyncResult, ToolConfig, ToolSkillConfig};
+use atm_core::models::{AiTool, McpServer, SyncResult, ToolConfig, ToolSkillConfig};
 use atm_core::{registry, skills, sync, tools};
 use std::collections::HashMap;
 
@@ -76,16 +76,6 @@ fn list_all_skills() -> Vec<ToolSkillConfig> {
 }
 
 #[tauri::command]
-fn get_skill(tool: AiTool, name: String) -> Result<Skill, String> {
-    skills::get_skill(tool, &name).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn save_skill(tool: AiTool, skill: Skill) -> Result<(), String> {
-    skills::save_skill(tool, &skill).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
 fn remove_skill(tool: AiTool, name: String) -> Result<(), String> {
     skills::remove_skill(tool, &name).map_err(|e| e.to_string())
 }
@@ -93,6 +83,37 @@ fn remove_skill(tool: AiTool, name: String) -> Result<(), String> {
 #[tauri::command]
 fn copy_skill(from: AiTool, to: AiTool, name: String) -> Result<(), String> {
     skills::copy_skill(from, to, &name).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn reveal_skill_path(tool: AiTool, name: String) -> Result<(), String> {
+    let dir = skills::skills_dir(tool).map_err(|e| e.to_string())?;
+    let path = dir.join(&name);
+    if !path.exists() {
+        return Err(format!("Skill directory not found: {}", path.display()));
+    }
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -109,10 +130,9 @@ pub fn run() {
             registry_add,
             registry_remove,
             list_all_skills,
-            get_skill,
-            save_skill,
             remove_skill,
             copy_skill,
+            reveal_skill_path,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

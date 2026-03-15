@@ -2,12 +2,10 @@ import { useMemo, useState } from "react";
 import {
   BookOpen,
   Trash2,
-  Plus,
   Check,
-  Edit2,
   Copy,
   CheckCheck,
-  Lock,
+  FolderOpen,
   Zap,
 } from "lucide-react";
 import {
@@ -18,9 +16,8 @@ import {
   SKILL_TOOLS,
   removeSkill,
   copySkill,
-  saveSkill,
+  revealSkillPath,
 } from "../hooks/useTauri";
-import { SkillForm } from "./SkillForm";
 import { useI18n } from "../i18n";
 
 interface SkillListProps {
@@ -32,16 +29,12 @@ interface UnifiedSkill {
   name: string;
   description: string;
   user_invokable: boolean;
-  license?: string;
   args: Skill["args"];
   content: string;
-  has_supporting_files: boolean;
   tools: AiTool[];
 }
 
 export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
-  const [showForm, setShowForm] = useState(false);
-  const [editingSkill, setEditingSkill] = useState<UnifiedSkill | null>(null);
   const [copiedSkill, setCopiedSkill] = useState<string | null>(null);
   const t = useI18n();
 
@@ -53,26 +46,19 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
         const existing = map.get(skill.name);
         if (existing) {
           existing.tools.push(config.tool);
-          // Merge: prefer the version with more content
           if (skill.content.length > existing.content.length) {
             existing.description = skill.description;
             existing.user_invokable = skill.user_invokable;
-            existing.license = skill.license;
             existing.args = skill.args;
             existing.content = skill.content;
-          }
-          if (skill.has_supporting_files) {
-            existing.has_supporting_files = true;
           }
         } else {
           map.set(skill.name, {
             name: skill.name,
             description: skill.description,
             user_invokable: skill.user_invokable,
-            license: skill.license,
             args: skill.args,
             content: skill.content,
-            has_supporting_files: skill.has_supporting_files,
             tools: [config.tool],
           });
         }
@@ -98,33 +84,15 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
       if (skill.tools.includes(tool)) {
         await removeSkill(tool, skill.name);
       } else {
-        // Find a source tool that has this skill, then copy
         const sourceTool = skill.tools[0];
         if (sourceTool) {
           await copySkill(sourceTool, tool, skill.name);
-        } else {
-          // No source — save directly
-          const skillData: Skill = {
-            name: skill.name,
-            description: skill.description,
-            user_invokable: skill.user_invokable,
-            license: skill.license,
-            args: skill.args,
-            content: skill.content,
-            has_supporting_files: false,
-          };
-          await saveSkill(tool, skillData);
         }
       }
       onRefresh();
     } catch (e) {
       console.error("Failed to toggle tool:", e);
     }
-  };
-
-  const handleEdit = (skill: UnifiedSkill) => {
-    setEditingSkill(skill);
-    setShowForm(true);
   };
 
   const handleCopy = async (skill: UnifiedSkill) => {
@@ -134,15 +102,12 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
     setTimeout(() => setCopiedSkill(null), 2000);
   };
 
-  const handleFormClose = () => {
-    setShowForm(false);
-    setEditingSkill(null);
-  };
-
-  const handleFormSaved = () => {
-    setShowForm(false);
-    setEditingSkill(null);
-    onRefresh();
+  const handleReveal = async (skill: UnifiedSkill) => {
+    try {
+      await revealSkillPath(skill.tools[0], skill.name);
+    } catch (e) {
+      console.error("Failed to reveal skill:", e);
+    }
   };
 
   const skillCountText =
@@ -154,16 +119,7 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">{t("allSkills")}</h2>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-text-secondary">{skillCountText}</span>
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 shadow-[0_0_0_1px_rgba(99,102,241,0.5),0_2px_8px_rgba(99,102,241,0.25)]"
-          >
-            <Plus size={15} />
-            {t("addSkill")}
-          </button>
-        </div>
+        <span className="text-sm text-text-secondary">{skillCountText}</span>
       </div>
 
       {unified.length === 0 ? (
@@ -174,7 +130,9 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
           <p className="font-medium text-text-primary/70">
             {t("noSkillsFound")}
           </p>
-          <p className="text-sm mt-1">{t("noSkillsHint")}</p>
+          <p className="text-sm mt-1 font-mono text-text-secondary/70">
+            {t("noSkillsHint")}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -185,17 +143,7 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium">{skill.name}</h3>
-                    {skill.has_supporting_files && (
-                      <span
-                        className="text-text-secondary/50"
-                        title={t("readOnlySkill")}
-                      >
-                        <Lock size={13} />
-                      </span>
-                    )}
-                  </div>
+                  <h3 className="font-medium">{skill.name}</h3>
                   {skill.description && (
                     <p className="text-sm text-text-secondary mt-1 truncate">
                       {skill.description}
@@ -255,15 +203,13 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
                       <Copy size={15} />
                     )}
                   </button>
-                  {!skill.has_supporting_files && (
-                    <button
-                      onClick={() => handleEdit(skill)}
-                      className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-accent/15 text-text-secondary hover:text-accent transition-all duration-200"
-                      title={t("editSkill")}
-                    >
-                      <Edit2 size={15} />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleReveal(skill)}
+                    className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-accent/15 text-text-secondary hover:text-accent transition-all duration-200"
+                    title={t("revealInFinder")}
+                  >
+                    <FolderOpen size={15} />
+                  </button>
                   <button
                     onClick={() => handleDelete(skill)}
                     className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200"
@@ -276,14 +222,6 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
             </div>
           ))}
         </div>
-      )}
-
-      {showForm && (
-        <SkillForm
-          editingSkill={editingSkill ?? undefined}
-          onClose={handleFormClose}
-          onSaved={handleFormSaved}
-        />
       )}
     </div>
   );

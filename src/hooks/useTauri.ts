@@ -112,14 +112,6 @@ export async function listAllSkills(): Promise<ToolSkillConfig[]> {
   return invoke("list_all_skills");
 }
 
-export async function getSkill(tool: AiTool, name: string): Promise<Skill> {
-  return invoke("get_skill", { tool, name });
-}
-
-export async function saveSkill(tool: AiTool, skill: Skill): Promise<void> {
-  return invoke("save_skill", { tool, skill });
-}
-
 export async function removeSkill(tool: AiTool, name: string): Promise<void> {
   return invoke("remove_skill", { tool, name });
 }
@@ -130,4 +122,11 @@ export async function copySkill(
   name: string,
 ): Promise<void> {
   return invoke("copy_skill", { from, to, name });
+}
+
+export async function revealSkillPath(
+  tool: AiTool,
+  name: string,
+): Promise<void> {
+  return invoke("reveal_skill_path", { tool, name });
 }
