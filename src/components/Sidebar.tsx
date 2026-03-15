@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Wrench,
   Server,
+  BookOpen,
   RefreshCw,
   Settings,
   LayoutDashboard,
@@ -15,11 +16,13 @@ interface SidebarProps {
   onViewChange: (view: View) => void;
   toolCount: number;
   serverCount: number;
+  skillCount: number;
 }
 
 const NAV_ITEMS: { id: View; labelKey: TranslationKey; icon: typeof Wrench }[] = [
   { id: "tools", labelKey: "navTools", icon: Wrench },
   { id: "servers", labelKey: "navServers", icon: Server },
+  { id: "skills", labelKey: "navSkills", icon: BookOpen },
   { id: "sync", labelKey: "navSync", icon: RefreshCw },
   { id: "settings", labelKey: "navSettings", icon: Settings },
 ];
@@ -29,6 +32,7 @@ export function Sidebar({
   onViewChange,
   toolCount,
   serverCount,
+  skillCount,
 }: SidebarProps) {
   const [version, setVersion] = useState("");
   const t = useI18n();
@@ -59,7 +63,7 @@ export function Sidebar({
       </div>
 
       <div className="p-3 border-b border-border">
-        <div className="grid grid-cols-2 gap-2 text-center">
+        <div className="grid grid-cols-3 gap-2 text-center">
           <div className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50">
             <div className="text-lg font-bold text-accent leading-none">
               {toolCount}
@@ -71,6 +75,12 @@ export function Sidebar({
               {serverCount}
             </div>
             <div className="text-[11px] text-text-secondary mt-1">{t("statsServers")}</div>
+          </div>
+          <div className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50">
+            <div className="text-lg font-bold text-accent leading-none">
+              {skillCount}
+            </div>
+            <div className="text-[11px] text-text-secondary mt-1">{t("statsSkills")}</div>
           </div>
         </div>
       </div>

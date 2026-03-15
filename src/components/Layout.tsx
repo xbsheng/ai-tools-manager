@@ -9,6 +9,7 @@ interface LayoutProps {
   onViewChange: (view: View) => void;
   toolCount: number;
   serverCount: number;
+  skillCount: number;
 }
 
 export function Layout({
@@ -17,6 +18,7 @@ export function Layout({
   onViewChange,
   toolCount,
   serverCount,
+  skillCount,
 }: LayoutProps) {
   const { theme } = useSettings();
   const isLight = theme === "light";
@@ -42,6 +44,7 @@ export function Layout({
         onViewChange={onViewChange}
         toolCount={toolCount}
         serverCount={serverCount}
+        skillCount={skillCount}
       />
       <main className="relative flex-1 overflow-auto">
         {/* Drag region for title bar area */}

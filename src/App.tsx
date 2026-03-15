@@ -2,17 +2,28 @@ import { useState, useEffect, useCallback } from "react";
 import { Layout } from "./components/Layout";
 import { ToolList } from "./components/ToolList";
 import { ServerList } from "./components/ServerList";
+import { SkillList } from "./components/SkillList";
 import { SyncPanel } from "./components/SyncPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
-import { detectTools, ToolConfig } from "./hooks/useTauri";
+import { detectTools, listAllSkills, ToolConfig, ToolSkillConfig } from "./hooks/useTauri";
 import { useI18n } from "./i18n";
 
-export type View = "tools" | "servers" | "sync" | "settings";
+export type View = "tools" | "servers" | "skills" | "sync" | "settings";
 
 export default function App() {
   const [view, setView] = useState<View>("tools");
   const [tools, setTools] = useState<ToolConfig[]>([]);
+  const [skillConfigs, setSkillConfigs] = useState<ToolSkillConfig[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const refreshSkills = useCallback(async () => {
+    try {
+      const result = await listAllSkills();
+      setSkillConfigs(result);
+    } catch {
+      setSkillConfigs([]);
+    }
+  }, []);
 
   const refresh = useCallback(async () => {
     try {
@@ -21,10 +32,10 @@ export default function App() {
     } catch {
       // Running outside Tauri (dev mode) - use mock data
       setTools([]);
-    } finally {
-      setLoading(false);
     }
-  }, []);
+    await refreshSkills();
+    setLoading(false);
+  }, [refreshSkills]);
 
   useEffect(() => {
     refresh();
@@ -33,6 +44,7 @@ export default function App() {
   const t = useI18n();
   const installedTools = tools.filter((t) => t.installed);
   const totalServers = new Set(tools.flatMap((t) => t.servers.map((s) => s.name))).size;
+  const totalSkills = new Set(skillConfigs.flatMap((c) => c.skills.map((s) => s.name))).size;
 
   return (
     <Layout
@@ -40,6 +52,7 @@ export default function App() {
       onViewChange={setView}
       toolCount={installedTools.length}
       serverCount={totalServers}
+      skillCount={totalSkills}
     >
       {loading ? (
         <div className="flex items-center justify-center h-full">
@@ -53,6 +66,9 @@ export default function App() {
           {view === "tools" && <ToolList tools={tools} onRefresh={refresh} />}
           {view === "servers" && (
             <ServerList tools={tools} onRefresh={refresh} />
+          )}
+          {view === "skills" && (
+            <SkillList skillConfigs={skillConfigs} onRefresh={refreshSkills} />
           )}
           {view === "sync" && <SyncPanel tools={tools} onRefresh={refresh} />}
           {view === "settings" && <SettingsPanel />}
