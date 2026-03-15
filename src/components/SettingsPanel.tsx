@@ -70,7 +70,7 @@ export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
                     href={updateChecker.releaseUrl ?? "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-all duration-200 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-all duration-200 shadow-[0_0_8px_rgba(77,120,204,0.1)]"
                   >
                     {t("downloadUpdate")}
                     <ExternalLink size={11} />
@@ -104,7 +104,7 @@ export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
                 onClick={() => setLanguage("en")}
                 className={`px-3 py-1 text-xs rounded-md transition-all duration-200 ${
                   language === "en"
-                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(77,120,204,0.1)]"
                     : "text-text-secondary hover:text-text-primary border border-transparent"
                 }`}
               >
@@ -114,7 +114,7 @@ export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
                 onClick={() => setLanguage("zh")}
                 className={`px-3 py-1 text-xs rounded-md transition-all duration-200 ${
                   language === "zh"
-                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(77,120,204,0.1)]"
                     : "text-text-secondary hover:text-text-primary border border-transparent"
                 }`}
               >
@@ -131,7 +131,7 @@ export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
                 onClick={() => setTheme("dark")}
                 className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-md transition-all duration-200 ${
                   theme === "dark"
-                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(77,120,204,0.1)]"
                     : "text-text-secondary hover:text-text-primary border border-transparent"
                 }`}
               >
@@ -142,7 +142,7 @@ export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
                 onClick={() => setTheme("light")}
                 className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-md transition-all duration-200 ${
                   theme === "light"
-                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(77,120,204,0.1)]"
                     : "text-text-secondary hover:text-text-primary border border-transparent"
                 }`}
               >

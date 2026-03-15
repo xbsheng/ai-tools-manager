@@ -296,7 +296,7 @@ export function ServerForm({
                 }}
                 className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all duration-200 ${
                   mode === key
-                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(77,120,204,0.1)]"
                     : "text-text-secondary hover:text-text-primary hover:bg-bg-hover border border-transparent"
                 }`}
               >
@@ -319,7 +319,7 @@ export function ServerForm({
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
+              className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(77,120,204,0.1)] transition-all duration-200"
               placeholder={
                 mode === "json" ? t("nameJsonPlaceholder") : t("namePlaceholder")
               }
@@ -336,7 +336,7 @@ export function ServerForm({
                 <input
                   value={command}
                   onChange={(e) => setCommand(e.target.value)}
-                  className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
+                  className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(77,120,204,0.1)] transition-all duration-200"
                   placeholder="npx"
                 />
               </div>
@@ -351,7 +351,7 @@ export function ServerForm({
                 <input
                   value={args}
                   onChange={(e) => setArgs(e.target.value)}
-                  className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
+                  className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(77,120,204,0.1)] transition-all duration-200"
                   placeholder="-y @modelcontextprotocol/server-filesystem"
                 />
               </div>
@@ -370,7 +370,7 @@ export function ServerForm({
                           next[i] = { ...pair, key: e.target.value };
                           setEnvPairs(next);
                         }}
-                        className="w-[38%] bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
+                        className="w-[38%] bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(77,120,204,0.1)] transition-all duration-200"
                         placeholder={t("envKey")}
                       />
                       <span className="text-text-secondary/30 text-xs">=</span>
@@ -381,7 +381,7 @@ export function ServerForm({
                           next[i] = { ...pair, value: e.target.value };
                           setEnvPairs(next);
                         }}
-                        className="flex-1 bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
+                        className="flex-1 bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(77,120,204,0.1)] transition-all duration-200"
                         placeholder={t("envValue")}
                       />
                       <button
@@ -415,7 +415,7 @@ export function ServerForm({
               <input
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
+                className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(77,120,204,0.1)] transition-all duration-200"
                 placeholder="http://localhost:3000/sse"
               />
             </div>
@@ -482,7 +482,7 @@ export function ServerForm({
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-50 shadow-[0_0_0_1px_rgba(94,106,210,0.5),0_2px_8px_rgba(94,106,210,0.25)]"
+              className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-50 shadow-[0_0_0_1px_rgba(77,120,204,0.5),0_2px_8px_rgba(77,120,204,0.25)]"
             >
               {saving
                 ? (isEdit ? t("saving") : t("adding"))
