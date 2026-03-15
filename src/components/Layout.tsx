@@ -84,7 +84,7 @@ export function Layout({
         {/* Drag region for title bar area */}
         <div className="sticky top-0 h-11 shrink-0 z-10 flex items-center" data-tauri-drag-region>
           <button
-            className="md:hidden ml-3 p-1.5 rounded-lg hover:bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
+            className="md:hidden ml-[74px] p-1.5 rounded-lg hover:bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle navigation"
           >
