@@ -134,3 +134,7 @@ export async function revealSkillPath(
 export async function revealPath(path: string): Promise<void> {
   return invoke("reveal_path", { path });
 }
+
+export async function openFile(path: string): Promise<void> {
+  return invoke("open_file", { path });
+}

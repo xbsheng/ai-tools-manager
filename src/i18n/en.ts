@@ -103,6 +103,7 @@ export const en = {
   copySkillContent: "Copy content",
   userInvokable: "User-invokable",
   revealInFinder: "Reveal in file browser",
+  openFile: "Open file",
 
   // Search
   searchServers: "Search servers...",

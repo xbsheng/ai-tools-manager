@@ -7,12 +7,14 @@ import {
   Plus,
   Trash2,
   FolderOpen,
+  FileText,
 } from "lucide-react";
 import {
   ToolConfig,
   TOOL_LABELS,
   removeServer,
   revealPath,
+  openFile,
   AiTool,
 } from "../hooks/useTauri";
 import { ServerForm } from "./ServerForm";
@@ -97,17 +99,25 @@ export function ToolList({ tools, onRefresh, showToast }: ToolListProps) {
 
               {isExpanded && (
                 <div className="border-t border-border px-4 py-3 bg-bg-primary/40 animate-slide-up">
-                  <div className="flex items-center gap-1.5 mb-3 group/path">
+                  <div className="flex items-center gap-1 mb-3">
                     <div className="text-[11px] text-text-secondary/60 font-mono truncate">
                       {config.config_path}
                     </div>
                     <button
                       onClick={() => revealPath(config.config_path)}
-                      className="p-1 rounded-md opacity-0 group-hover/path:opacity-100 hover:bg-accent/15 text-text-secondary/40 hover:text-accent transition-all duration-200 shrink-0"
+                      className="p-1 rounded-md hover:bg-accent/15 text-text-secondary/40 hover:text-accent transition-all duration-200 shrink-0"
                       aria-label={t("revealInFinder")}
                       title={t("revealInFinder")}
                     >
                       <FolderOpen size={12} />
+                    </button>
+                    <button
+                      onClick={() => openFile(config.config_path)}
+                      className="p-1 rounded-md hover:bg-accent/15 text-text-secondary/40 hover:text-accent transition-all duration-200 shrink-0"
+                      aria-label={t("openFile")}
+                      title={t("openFile")}
+                    >
+                      <FileText size={12} />
                     </button>
                   </div>
 

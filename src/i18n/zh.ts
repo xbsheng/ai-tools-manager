@@ -105,6 +105,7 @@ export const zh: Record<TranslationKey, string> = {
   copySkillContent: "复制内容",
   userInvokable: "用户可调用",
   revealInFinder: "在文件浏览器中打开",
+  openFile: "打开文件",
 
   // Search
   searchServers: "搜索服务器...",
