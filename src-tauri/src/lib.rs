@@ -1,5 +1,5 @@
-use atm_core::models::{AiTool, McpServer, SyncResult, ToolConfig};
-use atm_core::{registry, sync, tools};
+use atm_core::models::{AiTool, McpServer, Skill, SyncResult, ToolConfig, ToolSkillConfig};
+use atm_core::{registry, skills, sync, tools};
 use std::collections::HashMap;
 
 #[tauri::command]
@@ -68,6 +68,33 @@ fn registry_remove(name: String) -> Result<(), String> {
     registry::remove(&name).map_err(|e| e.to_string())
 }
 
+// --- Skill commands ---
+
+#[tauri::command]
+fn list_all_skills() -> Vec<ToolSkillConfig> {
+    skills::list_all_skills()
+}
+
+#[tauri::command]
+fn get_skill(tool: AiTool, name: String) -> Result<Skill, String> {
+    skills::get_skill(tool, &name).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn save_skill(tool: AiTool, skill: Skill) -> Result<(), String> {
+    skills::save_skill(tool, &skill).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn remove_skill(tool: AiTool, name: String) -> Result<(), String> {
+    skills::remove_skill(tool, &name).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn copy_skill(from: AiTool, to: AiTool, name: String) -> Result<(), String> {
+    skills::copy_skill(from, to, &name).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -81,6 +108,11 @@ pub fn run() {
             registry_list,
             registry_add,
             registry_remove,
+            list_all_skills,
+            get_skill,
+            save_skill,
+            remove_skill,
+            copy_skill,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
