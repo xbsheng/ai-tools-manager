@@ -24,3 +24,6 @@ Thumbs.db
 # Env
 .env
 .env.*
+
+# Local / IDE (avoid committing personal config)
+.claude/
