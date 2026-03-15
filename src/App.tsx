@@ -5,6 +5,7 @@ import { ServerList } from "./components/ServerList";
 import { SkillList } from "./components/SkillList";
 import { SyncPanel } from "./components/SyncPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { ToastContainer, ToastData, createToast } from "./components/Toast";
 import { detectTools, listAllSkills, ToolConfig, ToolSkillConfig } from "./hooks/useTauri";
 import { useI18n } from "./i18n";
 
@@ -15,6 +16,18 @@ export default function App() {
   const [tools, setTools] = useState<ToolConfig[]>([]);
   const [skillConfigs, setSkillConfigs] = useState<ToolSkillConfig[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toasts, setToasts] = useState<ToastData[]>([]);
+
+  const showToast = useCallback(
+    (type: ToastData["type"], message: string) => {
+      setToasts((prev) => [...prev, createToast(type, message)]);
+    },
+    [],
+  );
+
+  const dismissToast = useCallback((id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   const refreshSkills = useCallback(async () => {
     try {
@@ -65,15 +78,16 @@ export default function App() {
         <>
           {view === "tools" && <ToolList tools={tools} onRefresh={refresh} />}
           {view === "servers" && (
-            <ServerList tools={tools} onRefresh={refresh} />
+            <ServerList tools={tools} onRefresh={refresh} showToast={showToast} />
           )}
           {view === "skills" && (
-            <SkillList skillConfigs={skillConfigs} onRefresh={refreshSkills} />
+            <SkillList skillConfigs={skillConfigs} onRefresh={refreshSkills} showToast={showToast} />
           )}
           {view === "sync" && <SyncPanel tools={tools} onRefresh={refresh} />}
           {view === "settings" && <SettingsPanel />}
         </>
       )}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </Layout>
   );
 }

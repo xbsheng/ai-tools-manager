@@ -18,11 +18,14 @@ import {
   copySkill,
   revealSkillPath,
 } from "../hooks/useTauri";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { ToastData } from "./Toast";
 import { useI18n } from "../i18n";
 
 interface SkillListProps {
   skillConfigs: ToolSkillConfig[];
   onRefresh: () => void;
+  showToast: (type: ToastData["type"], message: string) => void;
 }
 
 interface UnifiedSkill {
@@ -34,8 +37,9 @@ interface UnifiedSkill {
   tools: AiTool[];
 }
 
-export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
+export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps) {
   const [copiedSkill, setCopiedSkill] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<UnifiedSkill | null>(null);
   const t = useI18n();
 
   const unified = useMemo(() => {
@@ -74,8 +78,9 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
         await removeSkill(tool, skill.name);
       }
       onRefresh();
+      showToast("success", t("deletedSkill", { name: skill.name }));
     } catch (e) {
-      console.error("Failed to delete skill:", e);
+      showToast("error", t("operationFailed", { error: String(e) }));
     }
   };
 
@@ -91,7 +96,7 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
       }
       onRefresh();
     } catch (e) {
-      console.error("Failed to toggle tool:", e);
+      showToast("error", t("operationFailed", { error: String(e) }));
     }
   };
 
@@ -106,7 +111,7 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
     try {
       await revealSkillPath(skill.tools[0], skill.name);
     } catch (e) {
-      console.error("Failed to reveal skill:", e);
+      showToast("error", t("operationFailed", { error: String(e) }));
     }
   };
 
@@ -211,7 +216,7 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
                     <FolderOpen size={15} />
                   </button>
                   <button
-                    onClick={() => handleDelete(skill)}
+                    onClick={() => setConfirmDelete(skill)}
                     className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200"
                     title={t("deleteSkill")}
                   >
@@ -222,6 +227,17 @@ export function SkillList({ skillConfigs, onRefresh }: SkillListProps) {
             </div>
           ))}
         </div>
+      )}
+
+      {confirmDelete && (
+        <ConfirmDialog
+          message={t("confirmDeleteSkill", { name: confirmDelete.name })}
+          onConfirm={() => {
+            handleDelete(confirmDelete);
+            setConfirmDelete(null);
+          }}
+          onCancel={() => setConfirmDelete(null)}
+        />
       )}
     </div>
   );

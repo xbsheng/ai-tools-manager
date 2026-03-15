@@ -102,6 +102,14 @@ export const en = {
   userInvokable: "User-invokable",
   revealInFinder: "Reveal in file browser",
 
+  // Confirm & Toast
+  confirm: "Confirm",
+  confirmDeleteServer: "Delete \"{name}\"? This will remove it from all tools.",
+  confirmDeleteSkill: "Delete \"{name}\"? This will remove it from all tools.",
+  deletedServer: "Deleted \"{name}\"",
+  deletedSkill: "Deleted \"{name}\"",
+  operationFailed: "Operation failed: {error}",
+
   // JsonEditor
   valid: "Valid",
   linesCount: "{count} lines",

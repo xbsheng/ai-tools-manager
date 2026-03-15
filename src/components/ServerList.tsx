@@ -11,11 +11,14 @@ import {
   registryRemove,
 } from "../hooks/useTauri";
 import { ServerForm, EditingServer } from "./ServerForm";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { ToastData } from "./Toast";
 import { useI18n } from "../i18n";
 
 interface ServerListProps {
   tools: ToolConfig[];
   onRefresh: () => void;
+  showToast: (type: ToastData["type"], message: string) => void;
 }
 
 interface UnifiedServer {
@@ -27,11 +30,12 @@ interface UnifiedServer {
   tools: AiTool[];
 }
 
-export function ServerList({ tools, onRefresh }: ServerListProps) {
+export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingServer, setEditingServer] = useState<EditingServer | null>(null);
   const [registryServers, setRegistryServers] = useState<McpServer[]>([]);
   const [copiedServer, setCopiedServer] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<UnifiedServer | null>(null);
   const t = useI18n();
 
   const loadRegistry = useCallback(async () => {
@@ -95,8 +99,9 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
       await registryRemove(server.name);
       loadRegistry();
       onRefresh();
+      showToast("success", t("deletedServer", { name: server.name }));
     } catch (e) {
-      console.error("Failed to delete:", e);
+      showToast("error", t("operationFailed", { error: String(e) }));
     }
   };
 
@@ -116,7 +121,7 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
       }
       onRefresh();
     } catch (e) {
-      console.error("Failed to toggle tool:", e);
+      showToast("error", t("operationFailed", { error: String(e) }));
     }
   };
 
@@ -255,7 +260,7 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
                     <Edit2 size={15} />
                   </button>
                   <button
-                    onClick={() => handleDelete(server)}
+                    onClick={() => setConfirmDelete(server)}
                     className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200"
                     title={t("deleteServer")}
                   >
@@ -277,6 +282,17 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
             setEditingServer(null);
           }}
           onSaved={handleServerAdded}
+        />
+      )}
+
+      {confirmDelete && (
+        <ConfirmDialog
+          message={t("confirmDeleteServer", { name: confirmDelete.name })}
+          onConfirm={() => {
+            handleDelete(confirmDelete);
+            setConfirmDelete(null);
+          }}
+          onCancel={() => setConfirmDelete(null)}
         />
       )}
     </div>

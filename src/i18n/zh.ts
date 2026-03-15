@@ -104,6 +104,14 @@ export const zh: Record<TranslationKey, string> = {
   userInvokable: "用户可调用",
   revealInFinder: "在文件浏览器中打开",
 
+  // Confirm & Toast
+  confirm: "确认",
+  confirmDeleteServer: "删除「{name}」？将从所有工具中移除。",
+  confirmDeleteSkill: "删除「{name}」？将从所有工具中移除。",
+  deletedServer: "已删除「{name}」",
+  deletedSkill: "已删除「{name}」",
+  operationFailed: "操作失败：{error}",
+
   // JsonEditor
   valid: "有效",
   linesCount: "{count} 行",
