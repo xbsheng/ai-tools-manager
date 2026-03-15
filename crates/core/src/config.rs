@@ -5,13 +5,10 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-fn mcp_servers_key(tool: AiTool) -> &'static str {
-    match tool {
-        AiTool::ClaudeCode => "mcpServers",
-        AiTool::Cursor => "mcpServers",
-        AiTool::Windsurf => "mcpServers",
-        AiTool::VsCodeCopilot => "mcpServers",
-    }
+fn mcp_servers_key(_tool: AiTool) -> &'static str {
+    // All supported tools currently use the same key.
+    // Kept as a function so per-tool keys can be added later if needed.
+    "mcpServers"
 }
 
 fn read_json(path: &Path) -> Result<Value> {
@@ -180,11 +177,9 @@ pub fn remove_server(path: &Path, tool: AiTool, name: &str) -> Result<()> {
 pub fn read_all_servers() -> HashMap<AiTool, Vec<McpServer>> {
     let mut result = HashMap::new();
     for &tool in AiTool::all() {
-        if let Ok(path) = crate::tools::config_path(tool) {
-            if path.exists() {
-                if let Ok(servers) = read_servers(&path, tool) {
-                    result.insert(tool, servers);
-                }
+        if let Ok(servers) = crate::tools::get_servers(tool) {
+            if !servers.is_empty() {
+                result.insert(tool, servers);
             }
         }
     }

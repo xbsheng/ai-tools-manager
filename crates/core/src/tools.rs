@@ -1,6 +1,7 @@
 use crate::config;
 use crate::models::{AiTool, McpServer, ToolConfig};
 use anyhow::Result;
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 fn home_dir() -> Result<PathBuf> {
@@ -31,13 +32,11 @@ pub fn config_path(tool: AiTool) -> Result<PathBuf> {
     Ok(paths.into_iter().next().unwrap())
 }
 
-pub fn detect_tool(tool: AiTool) -> Result<ToolConfig> {
+/// Merge servers from all config paths, dedup by name (first occurrence wins)
+fn collect_servers(tool: AiTool) -> Result<Vec<McpServer>> {
     let paths = config_paths(tool)?;
-    let installed = paths.iter().any(|p| p.exists());
-
-    // Merge servers from all config files, dedup by name
     let mut servers = Vec::new();
-    let mut seen = std::collections::HashSet::new();
+    let mut seen = HashSet::new();
     for path in &paths {
         if path.exists() {
             if let Ok(file_servers) = config::read_servers(path, tool) {
@@ -49,7 +48,13 @@ pub fn detect_tool(tool: AiTool) -> Result<ToolConfig> {
             }
         }
     }
+    Ok(servers)
+}
 
+pub fn detect_tool(tool: AiTool) -> Result<ToolConfig> {
+    let paths = config_paths(tool)?;
+    let installed = paths.iter().any(|p| p.exists());
+    let servers = collect_servers(tool)?;
     let primary_path = paths.into_iter().next().unwrap();
     Ok(ToolConfig {
         tool,
@@ -67,21 +72,7 @@ pub fn detect_all() -> Vec<ToolConfig> {
 }
 
 pub fn get_servers(tool: AiTool) -> Result<Vec<McpServer>> {
-    let paths = config_paths(tool)?;
-    let mut servers = Vec::new();
-    let mut seen = std::collections::HashSet::new();
-    for path in &paths {
-        if path.exists() {
-            if let Ok(file_servers) = config::read_servers(path, tool) {
-                for s in file_servers {
-                    if seen.insert(s.name.clone()) {
-                        servers.push(s);
-                    }
-                }
-            }
-        }
-    }
-    Ok(servers)
+    collect_servers(tool)
 }
 
 pub fn add_server(tool: AiTool, server: &McpServer) -> Result<()> {
@@ -90,15 +81,26 @@ pub fn add_server(tool: AiTool, server: &McpServer) -> Result<()> {
 }
 
 pub fn remove_server(tool: AiTool, name: &str) -> Result<()> {
-    // Try removing from all config files
     let paths = config_paths(tool)?;
     let mut removed = false;
+    let mut last_err: Option<anyhow::Error> = None;
     for path in &paths {
         if path.exists() {
-            if config::remove_server(path, tool, name).is_ok() {
-                removed = true;
+            match config::remove_server(path, tool, name) {
+                Ok(()) => removed = true,
+                Err(e) => {
+                    // "not found" is expected when a server only exists in one config file
+                    let msg = e.to_string();
+                    if msg.contains("not found") {
+                        continue;
+                    }
+                    last_err = Some(e);
+                }
             }
         }
+    }
+    if let Some(err) = last_err {
+        return Err(err);
     }
     if removed {
         Ok(())

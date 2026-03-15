@@ -69,16 +69,18 @@ fn parse_tool(s: &str) -> Result<AiTool> {
     s.parse::<AiTool>()
 }
 
-fn parse_env_vars(env_args: &[String]) -> HashMap<String, String> {
-    env_args
-        .iter()
-        .filter_map(|e| {
-            let mut parts = e.splitn(2, '=');
-            let key = parts.next()?.to_string();
-            let value = parts.next()?.to_string();
-            Some((key, value))
-        })
-        .collect()
+fn parse_env_vars(env_args: &[String]) -> Result<HashMap<String, String>> {
+    let mut map = HashMap::new();
+    for e in env_args {
+        let (key, value) = e
+            .split_once('=')
+            .ok_or_else(|| anyhow::anyhow!("Invalid env var '{}': expected KEY=VALUE format", e))?;
+        if key.is_empty() {
+            anyhow::bail!("Invalid env var '{}': key cannot be empty", e);
+        }
+        map.insert(key.to_string(), value.to_string());
+    }
+    Ok(map)
 }
 
 fn main() -> Result<()> {
@@ -130,12 +132,15 @@ fn main() -> Result<()> {
             if to.is_empty() {
                 anyhow::bail!("Specify target tools with --to");
             }
+            if command.is_none() && url.is_none() {
+                anyhow::bail!("Provide either --command or --url for the server");
+            }
             let server = McpServer {
                 name: name.clone(),
                 url,
                 command,
                 args,
-                env: parse_env_vars(&env),
+                env: parse_env_vars(&env)?,
             };
             for tool_name in &to {
                 let tool = parse_tool(tool_name)?;
@@ -176,22 +181,26 @@ fn main() -> Result<()> {
                 sync::sync_server(from_tool, &to_tools, &server_name)?
             };
 
-            if !result.added.is_empty() {
-                println!("Added:");
-                for a in &result.added {
-                    println!("  + {}", a);
+            if result.added.is_empty() && result.skipped.is_empty() && result.conflicts.is_empty() {
+                println!("Nothing to sync.");
+            } else {
+                if !result.added.is_empty() {
+                    println!("Added:");
+                    for a in &result.added {
+                        println!("  + {}", a);
+                    }
                 }
-            }
-            if !result.skipped.is_empty() {
-                println!("Skipped:");
-                for s in &result.skipped {
-                    println!("  - {}", s);
+                if !result.skipped.is_empty() {
+                    println!("Skipped:");
+                    for s in &result.skipped {
+                        println!("  - {}", s);
+                    }
                 }
-            }
-            if !result.conflicts.is_empty() {
-                println!("Conflicts:");
-                for c in &result.conflicts {
-                    println!("  ! {}", c);
+                if !result.conflicts.is_empty() {
+                    println!("Conflicts:");
+                    for c in &result.conflicts {
+                        println!("  ! {}", c);
+                    }
                 }
             }
         }
@@ -214,10 +223,12 @@ fn print_servers(servers: &[McpServer]) {
             println!("    url: {}", url);
         }
         if !server.args.is_empty() {
-            println!("    args: {:?}", server.args);
+            println!("    args: {}", server.args.join(" "));
         }
         if !server.env.is_empty() {
-            println!("    env: {:?}", server.env);
+            for (k, v) in &server.env {
+                println!("    env: {}={}", k, v);
+            }
         }
     }
 }
