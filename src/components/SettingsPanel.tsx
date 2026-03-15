@@ -52,7 +52,10 @@ export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
       "Installed Tools:",
       ...systemInfo.tools
         .filter((t) => t.installed)
-        .map((t) => `  - ${t.name} (${t.server_count} servers)`),
+        .map((t) => {
+          const ver = t.version ? ` v${t.version}` : "";
+          return `  - ${t.name}${ver} (${t.server_count} servers)`;
+        }),
     ];
     const notInstalled = systemInfo.tools.filter((t) => !t.installed);
     if (notInstalled.length > 0) {
@@ -249,9 +252,16 @@ export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
                 <div className="mt-2 space-y-1">
                   {systemInfo.tools.map((tool) => (
                     <div key={tool.name} className="flex items-center justify-between">
-                      <span className={`text-xs ${tool.installed ? "text-text-primary/80" : "text-text-secondary/50"}`}>
-                        {tool.name}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs ${tool.installed ? "text-text-primary/80" : "text-text-secondary/50"}`}>
+                          {tool.name}
+                        </span>
+                        {tool.version && (
+                          <span className="text-[10px] font-mono text-text-secondary/60">
+                            v{tool.version}
+                          </span>
+                        )}
+                      </div>
                       <span className={`text-[10px] font-mono ${tool.installed ? "text-emerald-400/70" : "text-text-secondary/40"}`}>
                         {tool.installed
                           ? t("systemServerCount", { count: String(tool.server_count) })

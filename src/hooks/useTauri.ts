@@ -146,6 +146,7 @@ export interface ToolInfo {
   installed: boolean;
   config_path: string;
   server_count: number;
+  version: string | null;
 }
 
 export interface SystemInfo {

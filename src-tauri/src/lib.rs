@@ -168,6 +168,7 @@ struct ToolInfo {
     installed: bool,
     config_path: String,
     server_count: usize,
+    version: Option<String>,
 }
 
 #[tauri::command]
@@ -180,11 +181,19 @@ fn get_system_info() -> SystemInfo {
     let detected = tools::detect_all();
     let tool_infos: Vec<ToolInfo> = detected
         .iter()
-        .map(|t| ToolInfo {
-            name: t.tool.to_string(),
-            installed: t.installed,
-            config_path: t.config_path.display().to_string(),
-            server_count: t.servers.len(),
+        .map(|t| {
+            let version = if t.installed {
+                detect_tool_version(t.tool)
+            } else {
+                None
+            };
+            ToolInfo {
+                name: t.tool.to_string(),
+                installed: t.installed,
+                config_path: t.config_path.display().to_string(),
+                server_count: t.servers.len(),
+                version,
+            }
         })
         .collect();
 
@@ -193,6 +202,45 @@ fn get_system_info() -> SystemInfo {
         os_version,
         arch,
         tools: tool_infos,
+    }
+}
+
+fn run_version_cmd(cmd: &str, args: &[&str]) -> Option<String> {
+    std::process::Command::new(cmd)
+        .args(args)
+        .output()
+        .ok()
+        .and_then(|o| {
+            if o.status.success() {
+                String::from_utf8(o.stdout).ok()
+            } else {
+                None
+            }
+        })
+        .and_then(|s| {
+            let first_line = s.lines().next()?.trim().to_string();
+            if first_line.is_empty() { None } else { Some(first_line) }
+        })
+}
+
+fn detect_tool_version(tool: AiTool) -> Option<String> {
+    match tool {
+        AiTool::ClaudeCode => {
+            // "2.1.76 (Claude Code)" → "2.1.76"
+            run_version_cmd("claude", &["--version"])
+                .map(|s| s.split_whitespace().next().unwrap_or(&s).to_string())
+        }
+        AiTool::Cursor => {
+            // "2.6.19" (first line)
+            run_version_cmd("cursor", &["--version"])
+        }
+        AiTool::Windsurf => {
+            run_version_cmd("windsurf", &["--version"])
+        }
+        AiTool::VsCodeCopilot => {
+            // "1.111.0" (first line)
+            run_version_cmd("code", &["--version"])
+        }
     }
 }
 
