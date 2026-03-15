@@ -11,6 +11,7 @@ interface LayoutProps {
   toolCount: number;
   serverCount: number;
   skillCount: number;
+  hasUpdate?: boolean;
 }
 
 export function Layout({
@@ -20,6 +21,7 @@ export function Layout({
   toolCount,
   serverCount,
   skillCount,
+  hasUpdate,
 }: LayoutProps) {
   const { theme } = useSettings();
   const isLight = theme === "light";
@@ -54,6 +56,7 @@ export function Layout({
           toolCount={toolCount}
           serverCount={serverCount}
           skillCount={skillCount}
+          hasUpdate={hasUpdate}
         />
       </div>
 
@@ -77,6 +80,7 @@ export function Layout({
           toolCount={toolCount}
           serverCount={serverCount}
           skillCount={skillCount}
+          hasUpdate={hasUpdate}
         />
       </div>
 

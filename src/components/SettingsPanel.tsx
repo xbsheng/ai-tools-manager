@@ -1,4 +1,4 @@
-import { Info, Terminal, Sun, Moon, Keyboard } from "lucide-react";
+import { Info, Terminal, Sun, Moon, Keyboard, ArrowUpCircle, Check, ExternalLink, RefreshCw } from "lucide-react";
 import { useI18n } from "../i18n";
 import { useSettings } from "../hooks/useSettings";
 
@@ -16,7 +16,21 @@ const CLI_COMMANDS = [
   "atm sync --all --from claude-code --to cursor,windsurf",
 ];
 
-export function SettingsPanel() {
+interface UpdateCheckerState {
+  checking: boolean;
+  latestVersion: string | null;
+  currentVersion: string | null;
+  hasUpdate: boolean;
+  releaseUrl: string | null;
+  error: string | null;
+  checkNow: () => void;
+}
+
+interface SettingsPanelProps {
+  updateChecker: UpdateCheckerState;
+}
+
+export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
   const t = useI18n();
   const { language, setLanguage, theme, setTheme } = useSettings();
 
@@ -25,6 +39,59 @@ export function SettingsPanel() {
       <h2 className="text-xl font-semibold mb-6">{t("settings")}</h2>
 
       <div className="space-y-4">
+        {/* Version & Update */}
+        <div className="bg-bg-card border border-border rounded-xl p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-1.5 rounded-lg bg-accent/10 shrink-0">
+              <ArrowUpCircle size={14} className="text-accent" />
+            </div>
+            <h3 className="text-sm font-medium">{t("currentVersion")}</h3>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-text-secondary font-mono">
+              v{updateChecker.currentVersion ?? "..."}
+            </span>
+            <div className="flex items-center gap-2">
+              {updateChecker.checking ? (
+                <span className="flex items-center gap-1.5 text-xs text-text-secondary">
+                  <RefreshCw size={12} className="animate-spin" />
+                  {t("checkingForUpdates")}
+                </span>
+              ) : updateChecker.error ? (
+                <span className="text-xs text-red-400">{t("updateCheckFailed")}</span>
+              ) : updateChecker.hasUpdate ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-emerald-400 font-medium">
+                    {t("newVersionAvailable").replace("{version}", updateChecker.latestVersion ?? "")}
+                  </span>
+                  <a
+                    href={updateChecker.releaseUrl ?? "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-all duration-200 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
+                  >
+                    {t("downloadUpdate")}
+                    <ExternalLink size={11} />
+                  </a>
+                </div>
+              ) : (
+                <span className="flex items-center gap-1.5 text-xs text-emerald-400">
+                  <Check size={12} />
+                  {t("upToDate")}
+                </span>
+              )}
+              {!updateChecker.checking && (
+                <button
+                  onClick={updateChecker.checkNow}
+                  className="px-2.5 py-1 text-xs text-text-secondary hover:text-text-primary rounded-lg hover:bg-bg-hover transition-all duration-200"
+                >
+                  {t("checkForUpdates")}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Language & Theme */}
         <div className="bg-bg-card border border-border rounded-xl p-5 space-y-4">
           {/* Language */}

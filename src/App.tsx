@@ -7,6 +7,7 @@ import { SyncPanel } from "./components/SyncPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { ToastContainer, ToastData, createToast } from "./components/Toast";
 import { detectTools, listAllSkills, ToolConfig, ToolSkillConfig } from "./hooks/useTauri";
+import { useUpdateChecker } from "./hooks/useUpdateChecker";
 import { useI18n } from "./i18n";
 
 export type View = "tools" | "servers" | "skills" | "sync" | "settings";
@@ -18,6 +19,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const t = useI18n();
+  const updateChecker = useUpdateChecker();
 
   const showToast = useCallback(
     (type: ToastData["type"], message: string) => {
@@ -128,6 +130,7 @@ export default function App() {
       toolCount={installedTools.length}
       serverCount={totalServers}
       skillCount={totalSkills}
+      hasUpdate={updateChecker.hasUpdate}
     >
       {loading ? (
         <div className="flex items-center justify-center h-full">
@@ -146,7 +149,7 @@ export default function App() {
             <SkillList skillConfigs={skillConfigs} onRefresh={refreshSkills} showToast={showToast} />
           )}
           {view === "sync" && <SyncPanel tools={tools} onRefresh={refresh} showToast={showToast} />}
-          {view === "settings" && <SettingsPanel />}
+          {view === "settings" && <SettingsPanel updateChecker={updateChecker} />}
         </>
       )}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />

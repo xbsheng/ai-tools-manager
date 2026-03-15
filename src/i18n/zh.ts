@@ -131,6 +131,15 @@ export const zh: Record<TranslationKey, string> = {
   shortcutNavSkills: "前往技能",
   shortcutNavSync: "前往同步",
 
+  // Update Checker
+  currentVersion: "当前版本",
+  checkForUpdates: "检查更新",
+  checkingForUpdates: "检查中...",
+  upToDate: "已是最新版本",
+  newVersionAvailable: "有新版本 v{version}",
+  downloadUpdate: "前往下载",
+  updateCheckFailed: "检查失败",
+
   // JsonEditor
   valid: "有效",
   linesCount: "{count} 行",

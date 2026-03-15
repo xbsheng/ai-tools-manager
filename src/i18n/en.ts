@@ -129,6 +129,15 @@ export const en = {
   shortcutNavSkills: "Go to Skills",
   shortcutNavSync: "Go to Sync",
 
+  // Update Checker
+  currentVersion: "Current version",
+  checkForUpdates: "Check for updates",
+  checkingForUpdates: "Checking...",
+  upToDate: "Up to date",
+  newVersionAvailable: "v{version} available",
+  downloadUpdate: "Download",
+  updateCheckFailed: "Check failed",
+
   // JsonEditor
   valid: "Valid",
   linesCount: "{count} lines",
