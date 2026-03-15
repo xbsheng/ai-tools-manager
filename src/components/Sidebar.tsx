@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Wrench,
   Server,
@@ -5,6 +6,7 @@ import {
   Settings,
   LayoutDashboard,
 } from "lucide-react";
+import { getVersion } from "@tauri-apps/api/app";
 import type { View } from "../App";
 
 interface SidebarProps {
@@ -27,6 +29,12 @@ export function Sidebar({
   toolCount,
   serverCount,
 }: SidebarProps) {
+  const [version, setVersion] = useState("");
+
+  useEffect(() => {
+    getVersion().then(setVersion).catch(() => setVersion("dev"));
+  }, []);
+
   return (
     <aside className="relative w-60 bg-bg-secondary border-r border-border flex flex-col z-10">
       {/* macOS traffic light spacer + drag region */}
@@ -88,7 +96,7 @@ export function Sidebar({
 
       <div className="p-3 border-t border-border">
         <p className="text-[11px] text-text-secondary/60 text-center">
-          v0.1.0
+          v{version}
         </p>
       </div>
     </aside>
