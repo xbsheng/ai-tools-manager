@@ -146,6 +146,17 @@ export const zh: Record<TranslationKey, string> = {
   confirmRestore: "将「{tool}」的配置恢复到上一次备份？",
   restoreSuccess: "已恢复备份",
 
+  // System Info
+  systemInfo: "系统信息",
+  systemInfoDescription: "复制系统和软件信息，方便反馈问题",
+  copySystemInfo: "复制信息",
+  copiedSystemInfo: "已复制!",
+  systemOs: "操作系统",
+  systemArch: "架构",
+  systemAppVersion: "应用版本",
+  systemInstalledTools: "已安装工具",
+  systemServerCount: "{count} 个服务器",
+
   // JsonEditor
   valid: "有效",
   linesCount: "{count} 行",

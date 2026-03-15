@@ -1,6 +1,8 @@
-import { Info, Terminal, Sun, Moon, Keyboard, ArrowUpCircle, Check, ExternalLink, RefreshCw } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Info, Terminal, Sun, Moon, Keyboard, ArrowUpCircle, Check, ExternalLink, RefreshCw, Monitor, Copy, CheckCheck } from "lucide-react";
 import { useI18n } from "../i18n";
 import { useSettings } from "../hooks/useSettings";
+import { getSystemInfo, type SystemInfo } from "../hooks/useTauri";
 
 const CONFIG_PATHS = [
   { tool: "Claude Code", path: "~/.claude/settings.json" },
@@ -33,6 +35,40 @@ interface SettingsPanelProps {
 export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
   const t = useI18n();
   const { language, setLanguage, theme, setTheme } = useSettings();
+  const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
+  const [infoCopied, setInfoCopied] = useState(false);
+
+  useEffect(() => {
+    getSystemInfo().then(setSystemInfo).catch(() => {});
+  }, []);
+
+  const buildInfoText = useCallback(() => {
+    if (!systemInfo) return "";
+    const lines = [
+      `App Version: v${updateChecker.currentVersion ?? "unknown"}`,
+      `OS: ${systemInfo.os_version}`,
+      `Architecture: ${systemInfo.arch}`,
+      "",
+      "Installed Tools:",
+      ...systemInfo.tools
+        .filter((t) => t.installed)
+        .map((t) => `  - ${t.name} (${t.server_count} servers)`),
+    ];
+    const notInstalled = systemInfo.tools.filter((t) => !t.installed);
+    if (notInstalled.length > 0) {
+      lines.push("", "Not Installed:");
+      notInstalled.forEach((t) => lines.push(`  - ${t.name}`));
+    }
+    return lines.join("\n");
+  }, [systemInfo, updateChecker.currentVersion]);
+
+  const handleCopyInfo = useCallback(async () => {
+    const text = buildInfoText();
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+    setInfoCopied(true);
+    setTimeout(() => setInfoCopied(false), 2000);
+  }, [buildInfoText]);
 
   return (
     <div>
@@ -166,6 +202,71 @@ export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* System Info */}
+        <div className="bg-bg-card border border-border rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 rounded-lg bg-accent/10 shrink-0">
+                <Monitor size={14} className="text-accent" />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium">{t("systemInfo")}</h3>
+                <p className="text-xs text-text-secondary mt-0.5">{t("systemInfoDescription")}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleCopyInfo}
+              disabled={!systemInfo}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+                infoCopied
+                  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                  : "bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {infoCopied ? <CheckCheck size={12} /> : <Copy size={12} />}
+              {infoCopied ? t("copiedSystemInfo") : t("copySystemInfo")}
+            </button>
+          </div>
+
+          {systemInfo ? (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between bg-bg-primary/80 rounded-lg px-3 py-2.5">
+                <span className="text-xs text-text-secondary">{t("systemAppVersion")}</span>
+                <span className="text-xs font-mono text-text-primary/80">v{updateChecker.currentVersion ?? "..."}</span>
+              </div>
+              <div className="flex items-center justify-between bg-bg-primary/80 rounded-lg px-3 py-2.5">
+                <span className="text-xs text-text-secondary">{t("systemOs")}</span>
+                <span className="text-xs font-mono text-text-primary/80">{systemInfo.os_version}</span>
+              </div>
+              <div className="flex items-center justify-between bg-bg-primary/80 rounded-lg px-3 py-2.5">
+                <span className="text-xs text-text-secondary">{t("systemArch")}</span>
+                <span className="text-xs font-mono text-text-primary/80">{systemInfo.arch}</span>
+              </div>
+              <div className="bg-bg-primary/80 rounded-lg px-3 py-2.5">
+                <span className="text-xs text-text-secondary">{t("systemInstalledTools")}</span>
+                <div className="mt-2 space-y-1">
+                  {systemInfo.tools.map((tool) => (
+                    <div key={tool.name} className="flex items-center justify-between">
+                      <span className={`text-xs ${tool.installed ? "text-text-primary/80" : "text-text-secondary/50"}`}>
+                        {tool.name}
+                      </span>
+                      <span className={`text-[10px] font-mono ${tool.installed ? "text-emerald-400/70" : "text-text-secondary/40"}`}>
+                        {tool.installed
+                          ? t("systemServerCount", { count: String(tool.server_count) })
+                          : "—"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-xs text-text-secondary/50 text-center py-4">
+              {t("loading")}
+            </div>
+          )}
         </div>
 
         {/* Config Paths */}

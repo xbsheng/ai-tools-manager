@@ -144,6 +144,17 @@ export const en = {
   confirmRestore: "Restore \"{tool}\" config to the previous backup?",
   restoreSuccess: "Backup restored",
 
+  // System Info
+  systemInfo: "System Info",
+  systemInfoDescription: "Copy system and software info for bug reports",
+  copySystemInfo: "Copy Info",
+  copiedSystemInfo: "Copied!",
+  systemOs: "OS",
+  systemArch: "Architecture",
+  systemAppVersion: "App Version",
+  systemInstalledTools: "Installed Tools",
+  systemServerCount: "{count} servers",
+
   // JsonEditor
   valid: "Valid",
   linesCount: "{count} lines",

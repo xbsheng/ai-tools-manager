@@ -1,5 +1,6 @@
 use atm_core::models::{AiTool, McpServer, SyncResult, ToolConfig, ToolSkillConfig};
 use atm_core::{registry, skills, sync, tools};
+use serde::Serialize;
 use std::collections::HashMap;
 
 #[tauri::command]
@@ -151,6 +152,85 @@ fn open_file(path: String) -> Result<(), String> {
     Ok(())
 }
 
+// --- System Info ---
+
+#[derive(Serialize)]
+struct SystemInfo {
+    os: String,
+    os_version: String,
+    arch: String,
+    tools: Vec<ToolInfo>,
+}
+
+#[derive(Serialize)]
+struct ToolInfo {
+    name: String,
+    installed: bool,
+    config_path: String,
+    server_count: usize,
+}
+
+#[tauri::command]
+fn get_system_info() -> SystemInfo {
+    let os = std::env::consts::OS.to_string();
+    let arch = std::env::consts::ARCH.to_string();
+
+    let os_version = get_os_version();
+
+    let detected = tools::detect_all();
+    let tool_infos: Vec<ToolInfo> = detected
+        .iter()
+        .map(|t| ToolInfo {
+            name: t.tool.to_string(),
+            installed: t.installed,
+            config_path: t.config_path.display().to_string(),
+            server_count: t.servers.len(),
+        })
+        .collect();
+
+    SystemInfo {
+        os,
+        os_version,
+        arch,
+        tools: tool_infos,
+    }
+}
+
+fn get_os_version() -> String {
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("sw_vers")
+            .arg("-productVersion")
+            .output()
+            .ok()
+            .and_then(|o| String::from_utf8(o.stdout).ok())
+            .map(|s| format!("macOS {}", s.trim()))
+            .unwrap_or_else(|| "macOS (unknown version)".to_string())
+    }
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("cmd")
+            .args(["/C", "ver"])
+            .output()
+            .ok()
+            .and_then(|o| String::from_utf8(o.stdout).ok())
+            .map(|s| s.trim().to_string())
+            .unwrap_or_else(|| "Windows (unknown version)".to_string())
+    }
+    #[cfg(target_os = "linux")]
+    {
+        std::fs::read_to_string("/etc/os-release")
+            .ok()
+            .and_then(|content| {
+                content
+                    .lines()
+                    .find(|l| l.starts_with("PRETTY_NAME="))
+                    .map(|l| l.trim_start_matches("PRETTY_NAME=").trim_matches('"').to_string())
+            })
+            .unwrap_or_else(|| "Linux (unknown distro)".to_string())
+    }
+}
+
 // --- Skill commands ---
 
 #[tauri::command]
@@ -196,6 +276,7 @@ pub fn run() {
             restore_backup,
             reveal_path,
             open_file,
+            get_system_info,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

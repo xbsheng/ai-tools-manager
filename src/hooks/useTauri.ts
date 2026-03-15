@@ -139,6 +139,26 @@ export async function openFile(path: string): Promise<void> {
   return invoke("open_file", { path });
 }
 
+// --- System Info ---
+
+export interface ToolInfo {
+  name: string;
+  installed: boolean;
+  config_path: string;
+  server_count: number;
+}
+
+export interface SystemInfo {
+  os: string;
+  os_version: string;
+  arch: string;
+  tools: ToolInfo[];
+}
+
+export async function getSystemInfo(): Promise<SystemInfo> {
+  return invoke("get_system_info");
+}
+
 // --- Backup / Restore ---
 
 export async function hasBackup(tool: AiTool): Promise<boolean> {
