@@ -18,8 +18,8 @@ export const zh: Record<TranslationKey, string> = {
 
   // ToolList
   aiTools: "AI 工具",
-  serverCount: "{count} 个服务器",
-  serverCountPlural: "{count} 个服务器",
+  serverCount: "{count} MCP",
+  serverCountPlural: "{count} MCP",
   noServersConfigured: "未配置 MCP 服务器",
   addServer: "添加服务器",
 

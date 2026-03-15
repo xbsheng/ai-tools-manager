@@ -16,8 +16,8 @@ export const en = {
 
   // ToolList
   aiTools: "AI Tools",
-  serverCount: "{count} server",
-  serverCountPlural: "{count} servers",
+  serverCount: "{count} MCP",
+  serverCountPlural: "{count} MCP",
   noServersConfigured: "No MCP servers configured",
   addServer: "Add Server",
 

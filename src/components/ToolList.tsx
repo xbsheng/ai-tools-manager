@@ -54,7 +54,7 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
       </div>
 
       <div className="space-y-3">
-        {tools.map((config) => {
+        {tools.filter((config) => TOOL_LABELS[config.tool]).map((config) => {
           const isExpanded = expanded.has(config.tool);
           return (
             <div
