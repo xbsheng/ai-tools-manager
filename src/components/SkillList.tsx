@@ -134,26 +134,28 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">{t("allSkills")}</h2>
-        <span className="text-sm text-text-secondary">{skillCountText}</span>
-      </div>
-
-      {unified.length > 0 && (
-        <div className="relative mb-4">
-          <Search
-            size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary/50"
-          />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-bg-card border border-border rounded-lg pl-9 pr-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
-            placeholder={t("searchSkills")}
-            aria-label={t("searchSkills")}
-          />
+      <div className="sticky top-11 z-10 -mx-4 px-4 md:-mx-6 md:px-6 pt-1 pb-4 bg-bg-primary/80 backdrop-blur-xl">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">{t("allSkills")}</h2>
+          <span className="text-sm text-text-secondary">{skillCountText}</span>
         </div>
-      )}
+
+        {unified.length > 0 && (
+          <div className="relative">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary/50"
+            />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-bg-card border border-border rounded-lg pl-9 pr-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
+              placeholder={t("searchSkills")}
+              aria-label={t("searchSkills")}
+            />
+          </div>
+        )}
+      </div>
 
       {unified.length === 0 ? (
         <div className="text-center py-20 text-text-secondary">

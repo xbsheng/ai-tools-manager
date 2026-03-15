@@ -36,7 +36,9 @@ export function SettingsPanel({ updateChecker }: SettingsPanelProps) {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-6">{t("settings")}</h2>
+      <div className="sticky top-11 z-10 -mx-4 px-4 md:-mx-6 md:px-6 pt-1 pb-4 bg-bg-primary/80 backdrop-blur-xl">
+        <h2 className="text-xl font-semibold">{t("settings")}</h2>
+      </div>
 
       <div className="space-y-4">
         {/* Version & Update */}
