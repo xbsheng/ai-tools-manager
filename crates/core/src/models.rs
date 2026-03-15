@@ -75,3 +75,36 @@ pub struct SyncResult {
     pub skipped: Vec<String>,
     pub conflicts: Vec<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SkillArg {
+    pub name: String,
+    #[serde(default)]
+    pub description: String,
+    #[serde(default)]
+    pub required: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Skill {
+    pub name: String,
+    #[serde(default)]
+    pub description: String,
+    #[serde(default, rename = "user-invokable")]
+    pub user_invokable: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub license: Option<String>,
+    #[serde(default)]
+    pub args: Vec<SkillArg>,
+    #[serde(default)]
+    pub content: String,
+    #[serde(default)]
+    pub has_supporting_files: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ToolSkillConfig {
+    pub tool: AiTool,
+    pub skills_dir: PathBuf,
+    pub skills: Vec<Skill>,
+}
