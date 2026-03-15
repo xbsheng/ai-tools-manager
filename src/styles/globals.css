@@ -55,6 +55,11 @@
   background: rgba(255, 255, 255, 0.14);
 }
 
+/* Prevent overscroll/bounce */
+html, body {
+  overscroll-behavior: none;
+}
+
 /* Selection */
 ::selection {
   background: rgba(99, 102, 241, 0.3);
