@@ -5,6 +5,7 @@ import { ServerList } from "./components/ServerList";
 import { SyncPanel } from "./components/SyncPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { detectTools, ToolConfig } from "./hooks/useTauri";
+import { useI18n } from "./i18n";
 
 export type View = "tools" | "servers" | "sync" | "settings";
 
@@ -29,6 +30,7 @@ export default function App() {
     refresh();
   }, [refresh]);
 
+  const t = useI18n();
   const installedTools = tools.filter((t) => t.installed);
   const totalServers = tools.reduce((sum, t) => sum + t.servers.length, 0);
 
@@ -43,7 +45,7 @@ export default function App() {
         <div className="flex items-center justify-center h-full">
           <div className="flex items-center gap-2 text-text-secondary text-sm">
             <div className="w-4 h-4 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-            Loading...
+            {t("loading")}
           </div>
         </div>
       ) : (

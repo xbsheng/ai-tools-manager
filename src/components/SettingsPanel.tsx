@@ -1,4 +1,6 @@
-import { Info, Terminal } from "lucide-react";
+import { Info, Terminal, Sun, Moon } from "lucide-react";
+import { useI18n } from "../i18n";
+import { useSettings } from "../hooks/useSettings";
 
 const CONFIG_PATHS = [
   { tool: "Claude Code", path: "~/.claude/settings.json" },
@@ -15,11 +17,73 @@ const CLI_COMMANDS = [
 ];
 
 export function SettingsPanel() {
+  const t = useI18n();
+  const { language, setLanguage, theme, setTheme } = useSettings();
+
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-6">Settings</h2>
+      <h2 className="text-xl font-semibold mb-6">{t("settings")}</h2>
 
       <div className="space-y-4">
+        {/* Language & Theme */}
+        <div className="bg-bg-card border border-border rounded-xl p-5 space-y-4">
+          {/* Language */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">{t("language")}</span>
+            <div className="flex gap-1 p-0.5 bg-bg-primary/80 rounded-lg border border-border/50">
+              <button
+                onClick={() => setLanguage("en")}
+                className={`px-3 py-1 text-xs rounded-md transition-all duration-200 ${
+                  language === "en"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(99,102,241,0.1)]"
+                    : "text-text-secondary hover:text-text-primary border border-transparent"
+                }`}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => setLanguage("zh")}
+                className={`px-3 py-1 text-xs rounded-md transition-all duration-200 ${
+                  language === "zh"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(99,102,241,0.1)]"
+                    : "text-text-secondary hover:text-text-primary border border-transparent"
+                }`}
+              >
+                中文
+              </button>
+            </div>
+          </div>
+
+          {/* Theme */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">{t("theme")}</span>
+            <div className="flex gap-1 p-0.5 bg-bg-primary/80 rounded-lg border border-border/50">
+              <button
+                onClick={() => setTheme("dark")}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-md transition-all duration-200 ${
+                  theme === "dark"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(99,102,241,0.1)]"
+                    : "text-text-secondary hover:text-text-primary border border-transparent"
+                }`}
+              >
+                <Moon size={12} />
+                {t("themeDark")}
+              </button>
+              <button
+                onClick={() => setTheme("light")}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-md transition-all duration-200 ${
+                  theme === "light"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(99,102,241,0.1)]"
+                    : "text-text-secondary hover:text-text-primary border border-transparent"
+                }`}
+              >
+                <Sun size={12} />
+                {t("themeLight")}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* About */}
         <div className="bg-bg-card border border-border rounded-xl p-5">
           <div className="flex items-start gap-3">
@@ -27,12 +91,9 @@ export function SettingsPanel() {
               <Info size={14} className="text-accent" />
             </div>
             <div className="text-sm text-text-secondary leading-relaxed">
-              <p>
-                AI Tools Manager (ATM) helps you manage MCP server
-                configurations across multiple AI coding tools.
-              </p>
+              <p>{t("aboutDescription")}</p>
               <p className="mt-2 text-text-secondary/70">
-                Supported: Claude Code, Cursor, Windsurf, VS Code Copilot
+                {t("supportedTools")}
               </p>
             </div>
           </div>
@@ -41,7 +102,7 @@ export function SettingsPanel() {
         {/* Config Paths */}
         <div className="bg-bg-card border border-border rounded-xl p-5">
           <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-3">
-            Config Paths
+            {t("configPaths")}
           </h3>
           <div className="space-y-1.5">
             {CONFIG_PATHS.map((item) => (
@@ -63,7 +124,7 @@ export function SettingsPanel() {
           <div className="flex items-center gap-2 mb-3">
             <Terminal size={13} className="text-text-secondary" />
             <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-              CLI Usage
+              {t("cliUsage")}
             </h3>
           </div>
           <div className="bg-bg-primary/80 rounded-lg p-4 space-y-1.5 border border-border/50">

@@ -1,5 +1,6 @@
 import { useRef, useCallback, useMemo, useState } from "react";
 import { Braces, Check, AlertTriangle } from "lucide-react";
+import { useI18n } from "../i18n";
 
 /** Lightweight JSON editor with syntax highlighting, validation & format. */
 
@@ -112,6 +113,7 @@ export function JsonEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
   const [focused, setFocused] = useState(false);
+  const t = useI18n();
 
   const validation = useMemo(() => validateJson(value), [value]);
 
@@ -202,7 +204,7 @@ export function JsonEditor({
             (validation.valid ? (
               <span className="flex items-center gap-1 text-[10px] text-emerald-500/70">
                 <Check size={10} />
-                Valid
+                {t("valid")}
               </span>
             ) : (
               <span className="flex items-center gap-1 text-[10px] text-red-400/80 max-w-[240px] truncate">
@@ -220,18 +222,18 @@ export function JsonEditor({
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-text-secondary/30">
             {value.trim()
-              ? `${(value.match(/\n/g) || []).length + 1} lines`
+              ? t("linesCount", { count: (value.match(/\n/g) || []).length + 1 })
               : ""}
           </span>
           {value.trim() && validation.valid && (
             <button
               type="button"
               onClick={formatJson}
-              title="Format JSON"
+              title={t("formatJson")}
               className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-text-secondary/50 hover:text-accent hover:bg-accent/10 transition-colors"
             >
               <Braces size={11} />
-              Format
+              {t("format")}
             </button>
           )}
         </div>

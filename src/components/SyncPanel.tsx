@@ -12,6 +12,7 @@ import {
   syncServers,
   SyncResult,
 } from "../hooks/useTauri";
+import { useI18n } from "../i18n";
 
 interface SyncPanelProps {
   tools: ToolConfig[];
@@ -26,6 +27,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
   const [targets, setTargets] = useState<Set<AiTool>>(new Set());
   const [syncing, setSyncing] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
+  const t = useI18n();
 
   const toggleTarget = (tool: AiTool) => {
     const next = new Set(targets);
@@ -49,16 +51,21 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
     }
   };
 
+  const serverCountText = (count: number) =>
+    count !== 1
+      ? t("serverCountPlural", { count })
+      : t("serverCount", { count });
+
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-6">Sync MCP Servers</h2>
+      <h2 className="text-xl font-semibold mb-6">{t("syncTitle")}</h2>
 
       <div className="bg-bg-card border border-border rounded-xl p-6">
         <div className="grid grid-cols-[1fr_auto_1fr] gap-6 items-start">
           {/* Source */}
           <div>
             <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-3">
-              Source
+              {t("source")}
             </h3>
             <div className="space-y-2">
               {installed.map((config) => {
@@ -77,7 +84,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
                       {TOOL_LABELS[config.tool]}
                     </div>
                     <div className="text-xs text-text-secondary mt-0.5">
-                      {config.servers.length} server{config.servers.length !== 1 ? "s" : ""}
+                      {serverCountText(config.servers.length)}
                     </div>
                   </button>
                 );
@@ -95,7 +102,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
           {/* Targets */}
           <div>
             <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-3">
-              Targets
+              {t("targets")}
             </h3>
             <div className="space-y-2">
               {installed
@@ -116,7 +123,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
                         {TOOL_LABELS[config.tool]}
                       </div>
                       <div className="text-xs text-text-secondary mt-0.5">
-                        {config.servers.length} server{config.servers.length !== 1 ? "s" : ""}
+                        {serverCountText(config.servers.length)}
                       </div>
                     </button>
                   );
@@ -132,19 +139,19 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
             className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-40 disabled:active:scale-100 shadow-[0_0_0_1px_rgba(99,102,241,0.5),0_2px_8px_rgba(99,102,241,0.25)]"
           >
             <RefreshCw size={15} className={syncing ? "animate-spin" : ""} />
-            {syncing ? "Syncing..." : "Sync All Servers"}
+            {syncing ? t("syncing") : t("syncAll")}
           </button>
         </div>
       </div>
 
       {result && (
         <div className="mt-4 bg-bg-card border border-border rounded-xl p-5 space-y-4 animate-slide-up">
-          <h3 className="font-semibold text-sm">Sync Results</h3>
+          <h3 className="font-semibold text-sm">{t("syncResults")}</h3>
 
           {result.added.length > 0 && (
             <div className="pl-3 border-l-2 border-success/40">
               <div className="flex items-center gap-1.5 text-success text-xs font-medium mb-1.5">
-                <CheckCircle size={13} /> Added
+                <CheckCircle size={13} /> {t("added")}
               </div>
               {result.added.map((a, i) => (
                 <div key={i} className="text-sm text-text-secondary ml-5">
@@ -157,7 +164,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
           {result.skipped.length > 0 && (
             <div className="pl-3 border-l-2 border-text-secondary/20">
               <div className="flex items-center gap-1.5 text-text-secondary text-xs font-medium mb-1.5">
-                <CheckCircle size={13} /> Skipped (already exists)
+                <CheckCircle size={13} /> {t("skippedExists")}
               </div>
               {result.skipped.map((s, i) => (
                 <div key={i} className="text-sm text-text-secondary ml-5">
@@ -170,7 +177,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
           {result.conflicts.length > 0 && (
             <div className="pl-3 border-l-2 border-warning/40">
               <div className="flex items-center gap-1.5 text-warning text-xs font-medium mb-1.5">
-                <AlertTriangle size={13} /> Conflicts
+                <AlertTriangle size={13} /> {t("conflicts")}
               </div>
               {result.conflicts.map((c, i) => (
                 <div key={i} className="text-sm text-text-secondary ml-5">
@@ -183,7 +190,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
           {result.added.length === 0 &&
             result.skipped.length === 0 &&
             result.conflicts.length === 0 && (
-              <p className="text-sm text-text-secondary/60">Nothing to sync</p>
+              <p className="text-sm text-text-secondary/60">{t("nothingToSync")}</p>
             )}
         </div>
       )}

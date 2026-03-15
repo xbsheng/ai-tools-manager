@@ -14,6 +14,7 @@ import {
   AiTool,
 } from "../hooks/useTauri";
 import { ServerForm } from "./ServerForm";
+import { useI18n } from "../i18n";
 
 interface ToolListProps {
   tools: ToolConfig[];
@@ -23,6 +24,7 @@ interface ToolListProps {
 export function ToolList({ tools, onRefresh }: ToolListProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [addingTo, setAddingTo] = useState<AiTool | null>(null);
+  const t = useI18n();
 
   const toggle = (tool: string) => {
     const next = new Set(expanded);
@@ -40,10 +42,15 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
     }
   };
 
+  const serverCountText = (count: number) =>
+    count !== 1
+      ? t("serverCountPlural", { count })
+      : t("serverCount", { count });
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">AI Tools</h2>
+        <h2 className="text-xl font-semibold">{t("aiTools")}</h2>
       </div>
 
       <div className="space-y-3">
@@ -73,7 +80,7 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
                 </div>
                 <div className="flex items-center gap-2 text-text-secondary text-xs">
                   <Server size={13} />
-                  {config.servers.length} server{config.servers.length !== 1 ? "s" : ""}
+                  {serverCountText(config.servers.length)}
                 </div>
               </button>
 
@@ -85,7 +92,7 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
 
                   {config.servers.length === 0 ? (
                     <p className="text-sm text-text-secondary/60 py-2">
-                      No MCP servers configured
+                      {t("noServersConfigured")}
                     </p>
                   ) : (
                     <div className="space-y-1.5">
@@ -123,7 +130,7 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
                       className="mt-3 flex items-center gap-1.5 text-xs text-accent hover:text-accent-hover transition-colors"
                     >
                       <Plus size={13} />
-                      Add Server
+                      {t("addServer")}
                     </button>
                   )}
                 </div>

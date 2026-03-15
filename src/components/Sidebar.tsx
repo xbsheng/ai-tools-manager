@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { getVersion } from "@tauri-apps/api/app";
 import type { View } from "../App";
+import { useI18n, type TranslationKey } from "../i18n";
 
 interface SidebarProps {
   view: View;
@@ -16,11 +17,11 @@ interface SidebarProps {
   serverCount: number;
 }
 
-const NAV_ITEMS: { id: View; label: string; icon: typeof Wrench }[] = [
-  { id: "tools", label: "Tools", icon: Wrench },
-  { id: "servers", label: "Servers", icon: Server },
-  { id: "sync", label: "Sync", icon: RefreshCw },
-  { id: "settings", label: "Settings", icon: Settings },
+const NAV_ITEMS: { id: View; labelKey: TranslationKey; icon: typeof Wrench }[] = [
+  { id: "tools", labelKey: "navTools", icon: Wrench },
+  { id: "servers", labelKey: "navServers", icon: Server },
+  { id: "sync", labelKey: "navSync", icon: RefreshCw },
+  { id: "settings", labelKey: "navSettings", icon: Settings },
 ];
 
 export function Sidebar({
@@ -30,6 +31,7 @@ export function Sidebar({
   serverCount,
 }: SidebarProps) {
   const [version, setVersion] = useState("");
+  const t = useI18n();
 
   useEffect(() => {
     getVersion().then(setVersion).catch(() => setVersion("dev"));
@@ -48,9 +50,9 @@ export function Sidebar({
             <LayoutDashboard size={18} className="text-accent" />
           </div>
           <div>
-            <h1 className="font-semibold text-sm leading-none">ATM</h1>
+            <h1 className="font-semibold text-sm leading-none">{t("appName")}</h1>
             <p className="text-[11px] text-text-secondary mt-0.5">
-              AI Tools Manager
+              {t("appDescription")}
             </p>
           </div>
         </div>
@@ -62,13 +64,13 @@ export function Sidebar({
             <div className="text-lg font-bold text-accent leading-none">
               {toolCount}
             </div>
-            <div className="text-[11px] text-text-secondary mt-1">Tools</div>
+            <div className="text-[11px] text-text-secondary mt-1">{t("statsTools")}</div>
           </div>
           <div className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50">
             <div className="text-lg font-bold text-accent leading-none">
               {serverCount}
             </div>
-            <div className="text-[11px] text-text-secondary mt-1">Servers</div>
+            <div className="text-[11px] text-text-secondary mt-1">{t("statsServers")}</div>
           </div>
         </div>
       </div>
@@ -88,7 +90,7 @@ export function Sidebar({
               }`}
             >
               <Icon size={17} strokeWidth={active ? 2.2 : 1.8} />
-              <span className={active ? "font-medium" : ""}>{item.label}</span>
+              <span className={active ? "font-medium" : ""}>{t(item.labelKey)}</span>
             </button>
           );
         })}

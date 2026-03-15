@@ -1,0 +1,91 @@
+import type { TranslationKey } from "./en";
+
+export const zh: Record<TranslationKey, string> = {
+  // App
+  loading: "加载中...",
+
+  // Sidebar
+  appName: "ATM",
+  appDescription: "AI 工具管理器",
+  statsTools: "工具",
+  statsServers: "服务器",
+
+  // Navigation
+  navTools: "工具",
+  navServers: "服务器",
+  navSync: "同步",
+  navSettings: "设置",
+
+  // ToolList
+  aiTools: "AI 工具",
+  serverCount: "{count} 个服务器",
+  serverCountPlural: "{count} 个服务器",
+  noServersConfigured: "未配置 MCP 服务器",
+  addServer: "添加服务器",
+
+  // ServerList
+  allServers: "所有 MCP 服务器",
+  noServersFound: "未找到 MCP 服务器",
+  noServersHint: "点击「添加服务器」创建你的第一个 MCP 服务器",
+  removeFrom: "从 {tool} 移除",
+  addTo: "添加到 {tool}",
+  deleteServer: "删除服务器",
+
+  // SyncPanel
+  syncTitle: "同步 MCP 服务器",
+  source: "来源",
+  targets: "目标",
+  syncing: "同步中...",
+  syncAll: "同步全部服务器",
+  syncResults: "同步结果",
+  added: "已添加",
+  skippedExists: "已跳过（已存在）",
+  conflicts: "冲突",
+  nothingToSync: "无需同步",
+
+  // SettingsPanel
+  settings: "设置",
+  aboutDescription: "AI 工具管理器（ATM）帮助你管理多个 AI 编码工具的 MCP 服务器配置。",
+  supportedTools: "支持：Claude Code、Cursor、Windsurf、VS Code Copilot",
+  configPaths: "配置路径",
+  cliUsage: "CLI 用法",
+  language: "语言",
+  theme: "主题",
+  themeDark: "深色",
+  themeLight: "浅色",
+
+  // ServerForm
+  addServerTo: "添加服务器到 {tool}",
+  addMcpServer: "添加 MCP 服务器",
+  command: "命令",
+  url: "URL",
+  json: "JSON",
+  name: "名称",
+  nameAutoDetected: "（从 JSON 键自动检测）",
+  namePlaceholder: "my-server",
+  nameJsonPlaceholder: "可选 - 从 JSON 提取",
+  arguments: "参数",
+  argumentsHint: "（空格分隔）",
+  environment: "环境变量",
+  environmentHint: "（每行 KEY=VALUE）",
+  jsonConfiguration: "JSON 配置",
+  addToTools: "添加到工具",
+  cancel: "取消",
+  adding: "添加中...",
+
+  // ServerForm errors
+  errorNameRequired: "名称为必填项",
+  errorCommandRequired: "命令为必填项",
+  errorUrlRequired: "URL 为必填项",
+  errorPasteJson: "请粘贴 JSON 配置",
+  errorJsonCommandOrUrl: "JSON 必须包含 'command' 或 'url' 字段",
+  errorInvalidJson: "JSON 格式无效",
+  errorNameRequiredJson: "名称为必填项 - 请在上方输入或使用带键名的 JSON 格式",
+  errorSelectTool: "请至少选择一个工具",
+
+  // JsonEditor
+  valid: "有效",
+  linesCount: "{count} 行",
+  format: "格式化",
+  formatJson: "格式化 JSON",
+};

@@ -11,6 +11,7 @@ import {
   registryRemove,
 } from "../hooks/useTauri";
 import { ServerForm } from "./ServerForm";
+import { useI18n } from "../i18n";
 
 interface ServerListProps {
   tools: ToolConfig[];
@@ -29,6 +30,7 @@ interface UnifiedServer {
 export function ServerList({ tools, onRefresh }: ServerListProps) {
   const [showForm, setShowForm] = useState(false);
   const [registryServers, setRegistryServers] = useState<McpServer[]>([]);
+  const t = useI18n();
 
   const loadRegistry = useCallback(async () => {
     try {
@@ -122,20 +124,25 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
     onRefresh();
   };
 
+  const serverCountText =
+    unified.length !== 1
+      ? t("serverCountPlural", { count: unified.length })
+      : t("serverCount", { count: unified.length });
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">All MCP Servers</h2>
+        <h2 className="text-xl font-semibold">{t("allServers")}</h2>
         <div className="flex items-center gap-4">
           <span className="text-sm text-text-secondary">
-            {unified.length} server{unified.length !== 1 ? "s" : ""}
+            {serverCountText}
           </span>
           <button
             onClick={() => setShowForm(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 shadow-[0_0_0_1px_rgba(99,102,241,0.5),0_2px_8px_rgba(99,102,241,0.25)]"
           >
             <Plus size={15} />
-            Add Server
+            {t("addServer")}
           </button>
         </div>
       </div>
@@ -146,10 +153,10 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
             <Server size={40} className="opacity-40" />
           </div>
           <p className="font-medium text-text-primary/70">
-            No MCP servers found
+            {t("noServersFound")}
           </p>
           <p className="text-sm mt-1">
-            Click "Add Server" to create your first MCP server
+            {t("noServersHint")}
           </p>
         </div>
       ) : (
@@ -182,8 +189,8 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
                           }`}
                           title={
                             active
-                              ? `Remove from ${TOOL_LABELS[config.tool]}`
-                              : `Add to ${TOOL_LABELS[config.tool]}`
+                              ? t("removeFrom", { tool: TOOL_LABELS[config.tool] })
+                              : t("addTo", { tool: TOOL_LABELS[config.tool] })
                           }
                         >
                           {active && <Check size={11} strokeWidth={3} />}
@@ -197,7 +204,7 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
                 <button
                   onClick={() => handleDelete(server)}
                   className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200 ml-3 shrink-0"
-                  title="Delete server"
+                  title={t("deleteServer")}
                 >
                   <Trash2 size={15} />
                 </button>

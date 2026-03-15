@@ -9,6 +9,7 @@ import {
   registryAdd,
 } from "../hooks/useTauri";
 import { JsonEditor } from "./JsonEditor";
+import { useI18n } from "../i18n";
 
 type InputMode = "command" | "url" | "json";
 
@@ -68,9 +69,9 @@ function parseJsonConfig(
       };
     }
 
-    return "JSON must contain a 'command' or 'url' field";
+    return "errorJsonCommandOrUrl";
   } catch {
-    return "Invalid JSON format";
+    return "errorInvalidJson";
   }
 }
 
@@ -93,6 +94,7 @@ export function ServerForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const backdropRef = useRef<HTMLDivElement>(null);
+  const t = useI18n();
 
   const multiMode = !tool && installedTools;
 
@@ -114,15 +116,15 @@ export function ServerForm({
 
   const buildServerFromForm = (): McpServer | null => {
     if (!name.trim()) {
-      setError("Name is required");
+      setError(t("errorNameRequired"));
       return null;
     }
     if (mode === "command" && !command.trim()) {
-      setError("Command is required");
+      setError(t("errorCommandRequired"));
       return null;
     }
     if (mode === "url" && !url.trim()) {
-      setError("URL is required");
+      setError(t("errorUrlRequired"));
       return null;
     }
 
@@ -153,13 +155,13 @@ export function ServerForm({
 
   const buildServerFromJson = (): McpServer | null => {
     if (!jsonText.trim()) {
-      setError("Paste JSON configuration");
+      setError(t("errorPasteJson"));
       return null;
     }
 
     const result = parseJsonConfig(jsonText);
     if (typeof result === "string") {
-      setError(result);
+      setError(t(result as any));
       return null;
     }
 
@@ -168,7 +170,7 @@ export function ServerForm({
       server.name = name.trim();
     }
     if (!server.name) {
-      setError("Name is required — provide it above or use keyed JSON format");
+      setError(t("errorNameRequiredJson"));
       return null;
     }
     return server;
@@ -183,7 +185,7 @@ export function ServerForm({
     if (!server) return;
 
     if (!multiMode && selectedTools.size === 0) {
-      setError("Select at least one tool");
+      setError(t("errorSelectTool"));
       return;
     }
 
@@ -192,8 +194,8 @@ export function ServerForm({
       if (multiMode) {
         await registryAdd(server);
       }
-      for (const t of selectedTools) {
-        await addServer(t, server);
+      for (const tl of selectedTools) {
+        await addServer(tl, server);
       }
       onSaved();
     } catch (e) {
@@ -208,13 +210,13 @@ export function ServerForm({
   };
 
   const title = tool
-    ? `Add Server to ${TOOL_LABELS[tool]}`
-    : "Add MCP Server";
+    ? t("addServerTo", { tool: TOOL_LABELS[tool] })
+    : t("addMcpServer");
 
-  const modes: { key: InputMode; label: string; icon: typeof Terminal }[] = [
-    { key: "command", label: "Command", icon: Terminal },
-    { key: "url", label: "URL", icon: Globe },
-    { key: "json", label: "JSON", icon: FileJson },
+  const modes: { key: InputMode; labelKey: "command" | "url" | "json"; icon: typeof Terminal }[] = [
+    { key: "command", labelKey: "command", icon: Terminal },
+    { key: "url", labelKey: "url", icon: Globe },
+    { key: "json", labelKey: "json", icon: FileJson },
   ];
 
   return (
@@ -246,7 +248,7 @@ export function ServerForm({
 
           {/* Mode selector */}
           <div className="flex gap-1 p-1 bg-bg-primary/80 rounded-lg border border-border/50">
-            {modes.map(({ key, label, icon: Icon }) => (
+            {modes.map(({ key, labelKey, icon: Icon }) => (
               <button
                 key={key}
                 type="button"
@@ -261,7 +263,7 @@ export function ServerForm({
                 }`}
               >
                 <Icon size={13} />
-                {label}
+                {t(labelKey)}
               </button>
             ))}
           </div>
@@ -269,10 +271,10 @@ export function ServerForm({
           {/* Name field */}
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5">
-              Name
+              {t("name")}
               {mode === "json" && (
                 <span className="text-text-secondary/50 font-normal ml-1">
-                  (auto-detected from JSON key)
+                  {t("nameAutoDetected")}
                 </span>
               )}
             </label>
@@ -281,7 +283,7 @@ export function ServerForm({
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-200"
               placeholder={
-                mode === "json" ? "optional — extracted from JSON" : "my-server"
+                mode === "json" ? t("nameJsonPlaceholder") : t("namePlaceholder")
               }
             />
           </div>
@@ -291,7 +293,7 @@ export function ServerForm({
             <>
               <div>
                 <label className="block text-xs font-medium text-text-secondary mb-1.5">
-                  Command
+                  {t("command")}
                 </label>
                 <input
                   value={command}
@@ -303,9 +305,9 @@ export function ServerForm({
 
               <div>
                 <label className="block text-xs font-medium text-text-secondary mb-1.5">
-                  Arguments
+                  {t("arguments")}
                   <span className="text-text-secondary/50 font-normal ml-1">
-                    (space-separated)
+                    {t("argumentsHint")}
                   </span>
                 </label>
                 <input
@@ -318,9 +320,9 @@ export function ServerForm({
 
               <div>
                 <label className="block text-xs font-medium text-text-secondary mb-1.5">
-                  Environment
+                  {t("environment")}
                   <span className="text-text-secondary/50 font-normal ml-1">
-                    (KEY=VALUE per line)
+                    {t("environmentHint")}
                   </span>
                 </label>
                 <textarea
@@ -338,7 +340,7 @@ export function ServerForm({
           {mode === "url" && (
             <div>
               <label className="block text-xs font-medium text-text-secondary mb-1.5">
-                URL
+                {t("url")}
               </label>
               <input
                 value={url}
@@ -353,7 +355,7 @@ export function ServerForm({
           {mode === "json" && (
             <div>
               <label className="block text-xs font-medium text-text-secondary mb-1.5">
-                JSON Configuration
+                {t("jsonConfiguration")}
               </label>
               <JsonEditor
                 value={jsonText}
@@ -373,7 +375,7 @@ export function ServerForm({
           {multiMode && (
             <div>
               <label className="block text-xs font-medium text-text-secondary mb-2">
-                Add to tools
+                {t("addToTools")}
               </label>
               <div className="flex flex-wrap gap-2">
                 {installedTools
@@ -405,14 +407,14 @@ export function ServerForm({
               onClick={onClose}
               className="px-4 py-2 text-sm rounded-lg border border-border hover:bg-bg-hover active:scale-[0.98] transition-all duration-200"
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-50 shadow-[0_0_0_1px_rgba(99,102,241,0.5),0_2px_8px_rgba(99,102,241,0.25)]"
             >
-              {saving ? "Adding..." : "Add Server"}
+              {saving ? t("adding") : t("addServer")}
             </button>
           </div>
         </form>
