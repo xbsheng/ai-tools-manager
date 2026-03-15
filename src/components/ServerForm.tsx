@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Terminal, Globe, FileJson } from "lucide-react";
+import { X, Terminal, Globe, FileJson, Plus, Trash2 } from "lucide-react";
 import {
   AiTool,
   TOOL_LABELS,
@@ -103,13 +103,12 @@ export function ServerForm({
   const [command, setCommand] = useState(() => editingServer?.server.command ?? "");
   const [url, setUrl] = useState(() => editingServer?.server.url ?? "");
   const [args, setArgs] = useState(() => editingServer?.server.args.join(" ") ?? "");
-  const [env, setEnv] = useState(() => {
+  const [envPairs, setEnvPairs] = useState<{ key: string; value: string }[]>(() => {
     if (editingServer) {
-      return Object.entries(editingServer.server.env)
-        .map(([k, v]) => `${k}=${v}`)
-        .join("\n");
+      const entries = Object.entries(editingServer.server.env);
+      return entries.length > 0 ? entries.map(([k, v]) => ({ key: k, value: v })) : [];
     }
-    return "";
+    return [];
   });
   const [jsonText, setJsonText] = useState("");
   const [selectedTools, setSelectedTools] = useState<Set<AiTool>>(() => {
@@ -155,12 +154,9 @@ export function ServerForm({
     }
 
     const envMap: Record<string, string> = {};
-    if (env.trim()) {
-      for (const line of env.split("\n")) {
-        const idx = line.indexOf("=");
-        if (idx > 0) {
-          envMap[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
-        }
+    for (const pair of envPairs) {
+      if (pair.key.trim()) {
+        envMap[pair.key.trim()] = pair.value;
       }
     }
 
@@ -363,17 +359,49 @@ export function ServerForm({
               <div>
                 <label className="block text-xs font-medium text-text-secondary mb-1.5">
                   {t("environment")}
-                  <span className="text-text-secondary/50 font-normal ml-1">
-                    {t("environmentHint")}
-                  </span>
                 </label>
-                <textarea
-                  value={env}
-                  onChange={(e) => setEnv(e.target.value)}
-                  className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-200 resize-none"
-                  rows={3}
-                  placeholder={"API_KEY=xxx\nDEBUG=true"}
-                />
+                <div className="space-y-2">
+                  {envPairs.map((pair, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input
+                        value={pair.key}
+                        onChange={(e) => {
+                          const next = [...envPairs];
+                          next[i] = { ...pair, key: e.target.value };
+                          setEnvPairs(next);
+                        }}
+                        className="w-[38%] bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-200"
+                        placeholder={t("envKey")}
+                      />
+                      <span className="text-text-secondary/30 text-xs">=</span>
+                      <input
+                        value={pair.value}
+                        onChange={(e) => {
+                          const next = [...envPairs];
+                          next[i] = { ...pair, value: e.target.value };
+                          setEnvPairs(next);
+                        }}
+                        className="flex-1 bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm font-mono placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-200"
+                        placeholder={t("envValue")}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setEnvPairs(envPairs.filter((_, j) => j !== i))}
+                        className="p-1.5 rounded-lg hover:bg-danger/15 text-text-secondary/40 hover:text-danger transition-all duration-200 shrink-0"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setEnvPairs([...envPairs, { key: "", value: "" }])}
+                    className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-accent transition-colors duration-200 py-1"
+                  >
+                    <Plus size={13} />
+                    {t("addEnvVar")}
+                  </button>
+                </div>
               </div>
             </>
           )}
