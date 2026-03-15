@@ -81,3 +81,53 @@ export async function registryAdd(server: McpServer): Promise<void> {
 export async function registryRemove(name: string): Promise<void> {
   return invoke("registry_remove", { name });
 }
+
+// --- Skills ---
+
+export interface SkillArg {
+  name: string;
+  description: string;
+  required: boolean;
+}
+
+export interface Skill {
+  name: string;
+  description: string;
+  user_invokable: boolean;
+  license?: string;
+  args: SkillArg[];
+  content: string;
+  has_supporting_files: boolean;
+}
+
+export interface ToolSkillConfig {
+  tool: AiTool;
+  skills_dir: string;
+  skills: Skill[];
+}
+
+export const SKILL_TOOLS: AiTool[] = ["claude-code", "cursor"];
+
+export async function listAllSkills(): Promise<ToolSkillConfig[]> {
+  return invoke("list_all_skills");
+}
+
+export async function getSkill(tool: AiTool, name: string): Promise<Skill> {
+  return invoke("get_skill", { tool, name });
+}
+
+export async function saveSkill(tool: AiTool, skill: Skill): Promise<void> {
+  return invoke("save_skill", { tool, skill });
+}
+
+export async function removeSkill(tool: AiTool, name: string): Promise<void> {
+  return invoke("remove_skill", { tool, name });
+}
+
+export async function copySkill(
+  from: AiTool,
+  to: AiTool,
+  name: string,
+): Promise<void> {
+  return invoke("copy_skill", { from, to, name });
+}
