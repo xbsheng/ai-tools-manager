@@ -35,11 +35,18 @@ export function useUpdateChecker() {
     error: null,
   });
 
+  useEffect(() => {
+    getVersion()
+      .then((v) => setState((prev) => ({ ...prev, currentVersion: v })))
+      .catch(() => setState((prev) => ({ ...prev, currentVersion: "0.0.0" })));
+  }, []);
+
   const checkNow = useCallback(async () => {
     setState((prev) => ({ ...prev, checking: true, error: null }));
 
     try {
       const currentVersion = await getVersion().catch(() => "0.0.0");
+      setState((prev) => ({ ...prev, currentVersion }));
 
       const res = await fetch(
         `https://api.github.com/repos/${REPO}/releases/latest`,
