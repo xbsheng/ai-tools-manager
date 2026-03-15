@@ -2,9 +2,9 @@
 
 [中文文档](./README_zh.md)
 
-A cross-platform desktop app + CLI tool for managing MCP (Model Context Protocol) server configurations across multiple AI coding tools.
+A cross-platform desktop app and CLI for managing MCP (Model Context Protocol) server configurations across multiple AI coding tools — detect, add, remove, and sync servers in one place.
 
-## Supported AI Tools
+## Supported Tools
 
 | Tool | Config Path | Status |
 |------|------------|--------|
@@ -15,30 +15,68 @@ A cross-platform desktop app + CLI tool for managing MCP (Model Context Protocol
 
 ## Installation
 
-### From Release
+### Download
 
-Download the latest binary from [GitHub Releases](../../releases).
+Download the latest release from [GitHub Releases](https://github.com/xbsheng/ai-tools-manager/releases):
+
+| Platform | Desktop App | CLI |
+|----------|------------|-----|
+| macOS (Apple Silicon) | `.dmg` | `atm-macos-aarch64` |
+| macOS (Intel) | `.dmg` | `atm-macos-x86_64` |
+| Windows | `.msi` / `.exe` | `atm-windows-x86_64.exe` |
+| Linux | `.deb` / `.AppImage` | `atm-linux-x86_64` / `atm-linux-aarch64` |
 
 ### Build from Source
 
 **Prerequisites:** Rust 1.87+, Node.js 20+, pnpm
 
 ```bash
-# Clone
-git clone https://github.com/user/ai-tools-manager.git
+git clone https://github.com/xbsheng/ai-tools-manager.git
 cd ai-tools-manager
 
-# Build CLI only
+# CLI only
 cargo build -p atm-cli --release
+# binary at ./target/release/atm
 
-# Build GUI (Tauri)
+# Desktop app (Tauri)
 pnpm install
 pnpm tauri build
 ```
 
-## CLI Usage
+## Desktop App
 
-The CLI binary is called `atm`.
+The GUI provides a visual interface for all MCP server management tasks.
+
+```bash
+# Development
+pnpm tauri dev
+
+# Or run the built binary
+./target/release/atm-tauri
+```
+
+### Features
+
+- **Tools** — View all detected AI tools with their MCP server counts; expand to manage individual servers
+- **MCP** — Unified list of all MCP servers across every tool, with badges showing which tools use each server
+- **Skills** — Browse and manage custom skills for Claude Code and Cursor; copy skills between tools
+- **Sync** — Select a source tool and target tools, then batch-sync all servers with one click
+- **Settings** — Language (EN/中文), theme (dark/light), keyboard shortcuts reference, system info with one-click copy for bug reports
+- **Auto-update check** — Notifies when a new version is available on GitHub Releases
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `⌘ R` | Refresh data |
+| `⌘ N` | Add new server |
+| `⌘ ,` | Open settings |
+| `⌘ /` | Focus search |
+| `⌘ 1-4` | Navigate between views |
+
+## CLI
+
+The CLI binary is `atm`. It works independently of the desktop app.
 
 ### Detect installed tools
 
@@ -46,16 +84,15 @@ The CLI binary is called `atm`.
 atm detect
 ```
 
-Output:
 ```
 Detected AI Tools:
 
   Claude Code [installed]
-    Config: /home/user/.claude.json
-    MCP Servers: 2
-  Cursor [installed]
-    Config: /home/user/.cursor/mcp.json
+    Config: /Users/you/.claude.json
     MCP Servers: 3
+  Cursor [installed]
+    Config: /Users/you/.cursor/mcp.json
+    MCP Servers: 2
   Windsurf [not found]
   VS Code Copilot [not found]
 ```
@@ -63,10 +100,10 @@ Detected AI Tools:
 ### List MCP servers
 
 ```bash
-# List all servers across all tools
+# All tools
 atm list
 
-# List servers for a specific tool
+# Specific tool
 atm list --tool claude-code
 atm list --tool cursor
 ```
@@ -74,18 +111,18 @@ atm list --tool cursor
 ### Add a server
 
 ```bash
-# Add a command-based server
+# Command-based server
 atm add my-server \
   --command npx \
   --args -y @modelcontextprotocol/server-filesystem /home/user/docs \
   --to claude-code,cursor
 
-# Add a URL-based server (SSE/HTTP)
+# URL-based server (SSE/HTTP)
 atm add docs-server \
   --url https://docs.example.com/mcp \
   --to claude-code
 
-# Add with environment variables
+# With environment variables
 atm add my-api \
   --command node \
   --args server.js \
@@ -105,11 +142,10 @@ atm remove my-server --from claude-code,cursor
 # Sync a specific server
 atm sync my-server --from claude-code --to cursor,windsurf
 
-# Sync all servers from one tool to others
+# Sync all servers
 atm sync --all --from claude-code --to cursor,windsurf
 ```
 
-Sync output:
 ```
 Added:
   + my-server → Cursor
@@ -120,36 +156,37 @@ Conflicts:
   ! api-server → Windsurf (conflict: different config)
 ```
 
-## GUI
-
-Launch the desktop application:
-
-```bash
-# Development mode
-pnpm tauri dev
-
-# Or run the built application
-./target/release/atm-tauri
-```
-
-### Features
-
-- **Tools View** — See all detected AI tools, expand to view/manage their MCP servers
-- **Servers View** — Unified view of all MCP servers across tools, with tool badges
-- **Sync Panel** — Select source and target tools, batch sync all servers with one click
-- **Settings** — Reference for config paths and CLI usage
-
 ## Architecture
 
 ```
 ai-tools-manager/
 ├── crates/
-│   ├── core/          # Shared Rust library (models, config IO, sync logic)
-│   └── cli/           # CLI binary (clap)
-├── src-tauri/         # Tauri 2 backend (commands wrapping core)
-├── src/               # React + Tailwind CSS frontend
-└── .github/workflows/ # CI/CD
+│   ├── core/           # Shared library — models, config I/O, sync logic
+│   └── cli/            # CLI binary (clap)
+├── src-tauri/          # Tauri 2 backend — wraps core as IPC commands
+├── src/                # React 18 + TypeScript + Tailwind CSS 4 frontend
+│   ├── components/     # UI components (ToolList, ServerList, SkillList, etc.)
+│   ├── hooks/          # Tauri command wrappers, settings context
+│   └── i18n/           # Internationalization (EN / 中文)
+└── .github/workflows/  # CI — builds CLI + Tauri for all platforms on tag push
 ```
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Core | Rust (workspace with `core` + `cli` crates) |
+| Desktop | Tauri 2 |
+| Frontend | React 18, TypeScript, Tailwind CSS 4, Vite |
+| Icons | Lucide React |
+| Package Manager | pnpm |
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feat/my-feature`)
+3. Commit your changes
+4. Push and open a pull request
 
 ## License
 
