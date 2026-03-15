@@ -31,7 +31,11 @@ export function Layout({
         toolCount={toolCount}
         serverCount={serverCount}
       />
-      <main className="relative flex-1 overflow-auto p-6">{children}</main>
+      <main className="relative flex-1 overflow-auto">
+        {/* Drag region for title bar area */}
+        <div className="sticky top-0 h-11 shrink-0 z-10" data-tauri-drag-region />
+        <div className="px-6 pb-6">{children}</div>
+      </main>
     </div>
   );
 }

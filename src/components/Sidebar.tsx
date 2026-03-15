@@ -29,6 +29,11 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <aside className="relative w-60 bg-bg-secondary border-r border-border flex flex-col z-10">
+      {/* macOS traffic light spacer + drag region */}
+      <div
+        className="h-11 shrink-0 border-b border-border"
+        data-tauri-drag-region
+      />
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 rounded-lg bg-accent/15">
