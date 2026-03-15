@@ -66,24 +66,33 @@ export function Sidebar({
 
       <div className="p-3 border-b border-border">
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50">
+          <button
+            onClick={() => onViewChange("tools")}
+            className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50 hover:bg-bg-hover/60 hover:border-accent/30 transition-all duration-200 cursor-pointer"
+          >
             <div className="text-lg font-bold text-accent leading-none">
               {toolCount}
             </div>
             <div className="text-[11px] text-text-secondary mt-1">{t("statsTools")}</div>
-          </div>
-          <div className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50">
+          </button>
+          <button
+            onClick={() => onViewChange("servers")}
+            className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50 hover:bg-bg-hover/60 hover:border-accent/30 transition-all duration-200 cursor-pointer"
+          >
             <div className="text-lg font-bold text-accent leading-none">
               {serverCount}
             </div>
             <div className="text-[11px] text-text-secondary mt-1">{t("statsServers")}</div>
-          </div>
-          <div className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50">
+          </button>
+          <button
+            onClick={() => onViewChange("skills")}
+            className="bg-bg-card/80 rounded-lg p-2.5 border border-border/50 hover:bg-bg-hover/60 hover:border-accent/30 transition-all duration-200 cursor-pointer"
+          >
             <div className="text-lg font-bold text-accent leading-none">
               {skillCount}
             </div>
             <div className="text-[11px] text-text-secondary mt-1">{t("statsSkills")}</div>
-          </div>
+          </button>
         </div>
       </div>
 
