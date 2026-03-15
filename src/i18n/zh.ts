@@ -120,6 +120,17 @@ export const zh: Record<TranslationKey, string> = {
   deletedSkill: "已删除「{name}」",
   operationFailed: "操作失败：{error}",
 
+  // Keyboard Shortcuts
+  keyboardShortcuts: "快捷键",
+  shortcutRefresh: "刷新数据",
+  shortcutNewServer: "添加新服务器",
+  shortcutSettings: "打开设置",
+  shortcutSearch: "聚焦搜索",
+  shortcutNavTools: "前往工具",
+  shortcutNavServers: "前往 MCP",
+  shortcutNavSkills: "前往技能",
+  shortcutNavSync: "前往同步",
+
   // JsonEditor
   valid: "有效",
   linesCount: "{count} 行",

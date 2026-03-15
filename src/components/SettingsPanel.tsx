@@ -1,4 +1,4 @@
-import { Info, Terminal, Sun, Moon } from "lucide-react";
+import { Info, Terminal, Sun, Moon, Keyboard } from "lucide-react";
 import { useI18n } from "../i18n";
 import { useSettings } from "../hooks/useSettings";
 
@@ -114,6 +114,38 @@ export function SettingsPanel() {
                 <code className="text-xs text-text-secondary/70 font-mono">
                   {item.path}
                 </code>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Keyboard Shortcuts */}
+        <div className="bg-bg-card border border-border rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Keyboard size={13} className="text-text-secondary" />
+            <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+              {t("keyboardShortcuts")}
+            </h3>
+          </div>
+          <div className="space-y-1.5">
+            {([
+              ["⌘ R", t("shortcutRefresh")],
+              ["⌘ N", t("shortcutNewServer")],
+              ["⌘ ,", t("shortcutSettings")],
+              ["⌘ /", t("shortcutSearch")],
+              ["⌘ 1", t("shortcutNavTools")],
+              ["⌘ 2", t("shortcutNavServers")],
+              ["⌘ 3", t("shortcutNavSkills")],
+              ["⌘ 4", t("shortcutNavSync")],
+            ] as const).map(([key, desc]) => (
+              <div
+                key={key}
+                className="flex items-center justify-between bg-bg-primary/80 rounded-lg px-3 py-2"
+              >
+                <span className="text-sm text-text-secondary">{desc}</span>
+                <kbd className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-bg-hover border border-border text-text-secondary/80">
+                  {key}
+                </kbd>
               </div>
             ))}
           </div>

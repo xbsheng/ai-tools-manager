@@ -56,8 +56,65 @@ export default function App() {
     setLoading(false);
   }, [refreshSkills, showToast, t]);
 
+  // Trigger to open "Add Server" form from keyboard shortcut
+  const [newServerTrigger, setNewServerTrigger] = useState(0);
+
   useEffect(() => {
     refresh();
+  }, [refresh]);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+
+      // Ignore when inside input/textarea/contenteditable
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) {
+        // Allow Cmd+, even in inputs
+        if (e.key !== ",") return;
+      }
+
+      switch (e.key) {
+        case "r":
+          e.preventDefault();
+          refresh();
+          break;
+        case "n":
+          e.preventDefault();
+          setView("servers");
+          setNewServerTrigger((n) => n + 1);
+          break;
+        case ",":
+          e.preventDefault();
+          setView("settings");
+          break;
+        case "/":
+          e.preventDefault();
+          // Focus the search input on current page
+          (document.querySelector<HTMLInputElement>("input[type='text'], input[aria-label]"))?.focus();
+          break;
+        case "1":
+          e.preventDefault();
+          setView("tools");
+          break;
+        case "2":
+          e.preventDefault();
+          setView("servers");
+          break;
+        case "3":
+          e.preventDefault();
+          setView("skills");
+          break;
+        case "4":
+          e.preventDefault();
+          setView("sync");
+          break;
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, [refresh]);
 
   const installedTools = tools.filter((t) => t.installed);
@@ -83,7 +140,7 @@ export default function App() {
         <>
           {view === "tools" && <ToolList tools={tools} onRefresh={refresh} showToast={showToast} />}
           {view === "servers" && (
-            <ServerList tools={tools} onRefresh={refresh} showToast={showToast} />
+            <ServerList tools={tools} onRefresh={refresh} showToast={showToast} newServerTrigger={newServerTrigger} />
           )}
           {view === "skills" && (
             <SkillList skillConfigs={skillConfigs} onRefresh={refreshSkills} showToast={showToast} />

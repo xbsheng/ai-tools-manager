@@ -19,6 +19,7 @@ interface ServerListProps {
   tools: ToolConfig[];
   onRefresh: () => void;
   showToast: (type: ToastData["type"], message: string) => void;
+  newServerTrigger?: number;
 }
 
 interface UnifiedServer {
@@ -30,7 +31,7 @@ interface UnifiedServer {
   tools: AiTool[];
 }
 
-export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
+export function ServerList({ tools, onRefresh, showToast, newServerTrigger }: ServerListProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingServer, setEditingServer] = useState<EditingServer | null>(null);
   const [registryServers, setRegistryServers] = useState<McpServer[]>([]);
@@ -51,6 +52,13 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
   useEffect(() => {
     loadRegistry();
   }, [loadRegistry]);
+
+  // Open form when triggered by keyboard shortcut
+  useEffect(() => {
+    if (newServerTrigger && newServerTrigger > 0) {
+      setShowForm(true);
+    }
+  }, [newServerTrigger]);
 
   const installedTools = useMemo(
     () => tools.filter((t) => t.installed),

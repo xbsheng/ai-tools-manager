@@ -118,6 +118,17 @@ export const en = {
   deletedSkill: "Deleted \"{name}\"",
   operationFailed: "Operation failed: {error}",
 
+  // Keyboard Shortcuts
+  keyboardShortcuts: "Keyboard Shortcuts",
+  shortcutRefresh: "Refresh data",
+  shortcutNewServer: "Add new server",
+  shortcutSettings: "Open settings",
+  shortcutSearch: "Focus search",
+  shortcutNavTools: "Go to Tools",
+  shortcutNavServers: "Go to MCP",
+  shortcutNavSkills: "Go to Skills",
+  shortcutNavSync: "Go to Sync",
+
   // JsonEditor
   valid: "Valid",
   linesCount: "{count} lines",
