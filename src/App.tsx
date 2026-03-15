@@ -17,6 +17,7 @@ export default function App() {
   const [skillConfigs, setSkillConfigs] = useState<ToolSkillConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState<ToastData[]>([]);
+  const t = useI18n();
 
   const showToast = useCallback(
     (type: ToastData["type"], message: string) => {
@@ -33,28 +34,32 @@ export default function App() {
     try {
       const result = await listAllSkills();
       setSkillConfigs(result);
-    } catch {
+    } catch (e) {
       setSkillConfigs([]);
+      if (String(e) !== "window.__TAURI_INTERNALS__ is not defined") {
+        showToast("error", t("loadFailed"));
+      }
     }
-  }, []);
+  }, [showToast, t]);
 
   const refresh = useCallback(async () => {
     try {
       const result = await detectTools();
       setTools(result);
-    } catch {
-      // Running outside Tauri (dev mode) - use mock data
+    } catch (e) {
       setTools([]);
+      if (String(e) !== "window.__TAURI_INTERNALS__ is not defined") {
+        showToast("error", t("loadFailed"));
+      }
     }
     await refreshSkills();
     setLoading(false);
-  }, [refreshSkills]);
+  }, [refreshSkills, showToast, t]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  const t = useI18n();
   const installedTools = tools.filter((t) => t.installed);
   const totalServers = new Set(tools.flatMap((t) => t.servers.map((s) => s.name))).size;
   const totalSkills = new Set(skillConfigs.flatMap((c) => c.skills.map((s) => s.name))).size;
@@ -76,7 +81,7 @@ export default function App() {
         </div>
       ) : (
         <>
-          {view === "tools" && <ToolList tools={tools} onRefresh={refresh} />}
+          {view === "tools" && <ToolList tools={tools} onRefresh={refresh} showToast={showToast} />}
           {view === "servers" && (
             <ServerList tools={tools} onRefresh={refresh} showToast={showToast} />
           )}

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { Server, Trash2, Plus, Check, Edit2, Copy, CheckCheck } from "lucide-react";
+import { Server, Trash2, Plus, Check, Edit2, Copy, CheckCheck, Search } from "lucide-react";
 import {
   ToolConfig,
   TOOL_LABELS,
@@ -36,6 +36,7 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
   const [registryServers, setRegistryServers] = useState<McpServer[]>([]);
   const [copiedServer, setCopiedServer] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<UnifiedServer | null>(null);
+  const [search, setSearch] = useState("");
   const t = useI18n();
 
   const loadRegistry = useCallback(async () => {
@@ -90,6 +91,18 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
 
     return Array.from(map.values());
   }, [tools, registryServers]);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return unified;
+    const q = search.toLowerCase();
+    return unified.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.command?.toLowerCase().includes(q) ||
+        s.url?.toLowerCase().includes(q) ||
+        s.args.some((a) => a.toLowerCase().includes(q)),
+    );
+  }, [unified, search]);
 
   const handleDelete = async (server: UnifiedServer) => {
     try {
@@ -170,7 +183,7 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">{t("allServers")}</h2>
         <div className="flex items-center gap-4">
           <span className="text-sm text-text-secondary">
@@ -178,13 +191,29 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
           </span>
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 shadow-[0_0_0_1px_rgba(99,102,241,0.5),0_2px_8px_rgba(99,102,241,0.25)]"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 shadow-[0_0_0_1px_rgba(94,106,210,0.5),0_2px_8px_rgba(94,106,210,0.25)]"
           >
             <Plus size={15} />
             {t("addServer")}
           </button>
         </div>
       </div>
+
+      {unified.length > 0 && (
+        <div className="relative mb-4">
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary/50"
+          />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-bg-card border border-border rounded-lg pl-9 pr-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
+            placeholder={t("searchServers")}
+            aria-label={t("searchServers")}
+          />
+        </div>
+      )}
 
       {unified.length === 0 ? (
         <div className="text-center py-20 text-text-secondary">
@@ -198,12 +227,16 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
             {t("noServersHint")}
           </p>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16 text-text-secondary">
+          <p className="text-sm">{t("noSearchResults", { query: search })}</p>
+        </div>
       ) : (
         <div className="space-y-3">
-          {unified.map((server) => (
+          {filtered.map((server) => (
             <div
               key={server.name}
-              className="group bg-bg-card border border-border rounded-xl p-4 transition-all duration-200 hover:border-border hover:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.3)]"
+              className="group bg-bg-card border border-border rounded-xl p-4 transition-all duration-200 hover:border-border hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.4),0_0_40px_rgba(94,106,210,0.04)]"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
@@ -226,6 +259,11 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
                               ? "border-accent/40 bg-accent/15 text-accent"
                               : "border-border text-text-secondary hover:border-accent/30 hover:text-text-primary"
                           }`}
+                          aria-label={
+                            active
+                              ? t("removeFrom", { tool: TOOL_LABELS[config.tool] })
+                              : t("addTo", { tool: TOOL_LABELS[config.tool] })
+                          }
                           title={
                             active
                               ? t("removeFrom", { tool: TOOL_LABELS[config.tool] })
@@ -248,6 +286,7 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
                         ? "opacity-100 text-green-400"
                         : "opacity-0 group-hover:opacity-100 hover:bg-accent/15 text-text-secondary hover:text-accent"
                     }`}
+                    aria-label={t("copyAsJson")}
                     title={copiedServer === server.name ? t("copied") : t("copyAsJson")}
                   >
                     {copiedServer === server.name ? <CheckCheck size={15} /> : <Copy size={15} />}
@@ -255,6 +294,7 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
                   <button
                     onClick={() => handleEdit(server)}
                     className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-accent/15 text-text-secondary hover:text-accent transition-all duration-200"
+                    aria-label={t("editMcpServer")}
                     title={t("editMcpServer")}
                   >
                     <Edit2 size={15} />
@@ -262,6 +302,7 @@ export function ServerList({ tools, onRefresh, showToast }: ServerListProps) {
                   <button
                     onClick={() => setConfirmDelete(server)}
                     className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200"
+                    aria-label={t("deleteServer")}
                     title={t("deleteServer")}
                   >
                     <Trash2 size={15} />

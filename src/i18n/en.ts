@@ -102,7 +102,13 @@ export const en = {
   userInvokable: "User-invokable",
   revealInFinder: "Reveal in file browser",
 
+  // Search
+  searchServers: "Search servers...",
+  searchSkills: "Search skills...",
+  noSearchResults: "No results for \"{query}\"",
+
   // Confirm & Toast
+  loadFailed: "Failed to load data",
   confirm: "Confirm",
   confirmDeleteServer: "Delete \"{name}\"? This will remove it from all tools.",
   confirmDeleteSkill: "Delete \"{name}\"? This will remove it from all tools.",

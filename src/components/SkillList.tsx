@@ -7,6 +7,7 @@ import {
   CheckCheck,
   FolderOpen,
   Zap,
+  Search,
 } from "lucide-react";
 import {
   ToolSkillConfig,
@@ -40,6 +41,7 @@ interface UnifiedSkill {
 export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps) {
   const [copiedSkill, setCopiedSkill] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<UnifiedSkill | null>(null);
+  const [search, setSearch] = useState("");
   const t = useI18n();
 
   const unified = useMemo(() => {
@@ -71,6 +73,16 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
 
     return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [skillConfigs]);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return unified;
+    const q = search.toLowerCase();
+    return unified.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q),
+    );
+  }, [unified, search]);
 
   const handleDelete = async (skill: UnifiedSkill) => {
     try {
@@ -122,10 +134,26 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">{t("allSkills")}</h2>
         <span className="text-sm text-text-secondary">{skillCountText}</span>
       </div>
+
+      {unified.length > 0 && (
+        <div className="relative mb-4">
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary/50"
+          />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-bg-card border border-border rounded-lg pl-9 pr-3 py-2 text-sm placeholder:text-text-secondary/40 focus:outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgba(94,106,210,0.1)] transition-all duration-200"
+            placeholder={t("searchSkills")}
+            aria-label={t("searchSkills")}
+          />
+        </div>
+      )}
 
       {unified.length === 0 ? (
         <div className="text-center py-20 text-text-secondary">
@@ -139,12 +167,16 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
             {t("noSkillsHint")}
           </p>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16 text-text-secondary">
+          <p className="text-sm">{t("noSearchResults", { query: search })}</p>
+        </div>
       ) : (
         <div className="space-y-3">
-          {unified.map((skill) => (
+          {filtered.map((skill) => (
             <div
               key={skill.name}
-              className="group bg-bg-card border border-border rounded-xl p-4 transition-all duration-200 hover:border-border hover:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.3)]"
+              className="group bg-bg-card border border-border rounded-xl p-4 transition-all duration-200 hover:border-border hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.4),0_0_40px_rgba(94,106,210,0.04)]"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
@@ -179,6 +211,7 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
                               ? "border-accent/40 bg-accent/15 text-accent"
                               : "border-border text-text-secondary hover:border-accent/30 hover:text-text-primary"
                           }`}
+                          aria-label={`${active ? "Remove from" : "Add to"} ${TOOL_LABELS[tool]}`}
                         >
                           {active && <Check size={11} strokeWidth={3} />}
                           {TOOL_LABELS[tool]}
@@ -196,6 +229,7 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
                         ? "opacity-100 text-green-400"
                         : "opacity-0 group-hover:opacity-100 hover:bg-accent/15 text-text-secondary hover:text-accent"
                     }`}
+                    aria-label={t("copySkillContent")}
                     title={
                       copiedSkill === skill.name
                         ? t("copied")
@@ -211,6 +245,7 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
                   <button
                     onClick={() => handleReveal(skill)}
                     className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-accent/15 text-text-secondary hover:text-accent transition-all duration-200"
+                    aria-label={t("revealInFinder")}
                     title={t("revealInFinder")}
                   >
                     <FolderOpen size={15} />
@@ -218,6 +253,7 @@ export function SkillList({ skillConfigs, onRefresh, showToast }: SkillListProps
                   <button
                     onClick={() => setConfirmDelete(skill)}
                     className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200"
+                    aria-label={t("deleteSkill")}
                     title={t("deleteSkill")}
                   >
                     <Trash2 size={15} />

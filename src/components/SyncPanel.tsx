@@ -76,7 +76,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
                     onClick={() => setSource(config.tool)}
                     className={`w-full text-left px-4 py-3 rounded-lg border transition-all duration-200 ${
                       active
-                        ? "border-accent/40 bg-accent/10 text-accent shadow-[0_0_12px_rgba(99,102,241,0.08)]"
+                        ? "border-accent/40 bg-accent/10 text-accent shadow-[0_0_12px_rgba(94,106,210,0.08)]"
                         : "border-border hover:bg-bg-hover hover:border-border"
                     }`}
                   >
@@ -115,7 +115,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
                       onClick={() => toggleTarget(config.tool)}
                       className={`w-full text-left px-4 py-3 rounded-lg border transition-all duration-200 ${
                         active
-                          ? "border-accent/40 bg-accent/10 text-accent shadow-[0_0_12px_rgba(99,102,241,0.08)]"
+                          ? "border-accent/40 bg-accent/10 text-accent shadow-[0_0_12px_rgba(94,106,210,0.08)]"
                           : "border-border hover:bg-bg-hover hover:border-border"
                       }`}
                     >
@@ -136,7 +136,7 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
           <button
             onClick={handleSync}
             disabled={!source || targets.size === 0 || syncing}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-40 disabled:active:scale-100 shadow-[0_0_0_1px_rgba(99,102,241,0.5),0_2px_8px_rgba(99,102,241,0.25)]"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-accent text-white hover:bg-accent-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-40 disabled:active:scale-100 shadow-[0_0_0_1px_rgba(94,106,210,0.5),0_2px_8px_rgba(94,106,210,0.25)]"
           >
             <RefreshCw size={15} className={syncing ? "animate-spin" : ""} />
             {syncing ? t("syncing") : t("syncAll")}

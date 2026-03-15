@@ -35,7 +35,7 @@ export function SettingsPanel() {
                 onClick={() => setLanguage("en")}
                 className={`px-3 py-1 text-xs rounded-md transition-all duration-200 ${
                   language === "en"
-                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(99,102,241,0.1)]"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
                     : "text-text-secondary hover:text-text-primary border border-transparent"
                 }`}
               >
@@ -45,7 +45,7 @@ export function SettingsPanel() {
                 onClick={() => setLanguage("zh")}
                 className={`px-3 py-1 text-xs rounded-md transition-all duration-200 ${
                   language === "zh"
-                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(99,102,241,0.1)]"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
                     : "text-text-secondary hover:text-text-primary border border-transparent"
                 }`}
               >
@@ -62,7 +62,7 @@ export function SettingsPanel() {
                 onClick={() => setTheme("dark")}
                 className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-md transition-all duration-200 ${
                   theme === "dark"
-                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(99,102,241,0.1)]"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
                     : "text-text-secondary hover:text-text-primary border border-transparent"
                 }`}
               >
@@ -73,7 +73,7 @@ export function SettingsPanel() {
                 onClick={() => setTheme("light")}
                 className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-md transition-all duration-200 ${
                   theme === "light"
-                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(99,102,241,0.1)]"
+                    ? "bg-accent/15 text-accent border border-accent/30 shadow-[0_0_8px_rgba(94,106,210,0.1)]"
                     : "text-text-secondary hover:text-text-primary border border-transparent"
                 }`}
               >

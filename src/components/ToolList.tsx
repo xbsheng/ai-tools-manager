@@ -14,16 +14,23 @@ import {
   AiTool,
 } from "../hooks/useTauri";
 import { ServerForm } from "./ServerForm";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { ToastData } from "./Toast";
 import { useI18n } from "../i18n";
 
 interface ToolListProps {
   tools: ToolConfig[];
   onRefresh: () => void;
+  showToast: (type: ToastData["type"], message: string) => void;
 }
 
-export function ToolList({ tools, onRefresh }: ToolListProps) {
+export function ToolList({ tools, onRefresh, showToast }: ToolListProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [addingTo, setAddingTo] = useState<AiTool | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    tool: AiTool;
+    name: string;
+  } | null>(null);
   const t = useI18n();
 
   const toggle = (tool: string) => {
@@ -37,8 +44,9 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
     try {
       await removeServer(tool, name);
       onRefresh();
+      showToast("success", t("deletedServer", { name }));
     } catch (e) {
-      console.error("Failed to remove server:", e);
+      showToast("error", t("operationFailed", { error: String(e) }));
     }
   };
 
@@ -59,11 +67,12 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
           return (
             <div
               key={config.tool}
-              className="bg-bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.3)]"
+              className="bg-bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.4),0_0_40px_rgba(94,106,210,0.04)]"
             >
               <button
                 onClick={() => toggle(config.tool)}
                 className="w-full flex items-center justify-between p-4 hover:bg-bg-hover/50 transition-colors"
+                aria-expanded={isExpanded}
               >
                 <div className="flex items-center gap-3">
                   <div className="transition-transform duration-200" style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}>
@@ -113,9 +122,14 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
                           </div>
                           <button
                             onClick={() =>
-                              handleRemove(config.tool, server.name)
+                              setConfirmDelete({
+                                tool: config.tool,
+                                name: server.name,
+                              })
                             }
                             className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-danger/15 text-text-secondary hover:text-danger transition-all duration-200 shrink-0 ml-2"
+                            aria-label={t("deleteServer")}
+                            title={t("deleteServer")}
                           >
                             <Trash2 size={13} />
                           </button>
@@ -148,6 +162,17 @@ export function ToolList({ tools, onRefresh }: ToolListProps) {
             setAddingTo(null);
             onRefresh();
           }}
+        />
+      )}
+
+      {confirmDelete && (
+        <ConfirmDialog
+          message={t("confirmDeleteServer", { name: confirmDelete.name })}
+          onConfirm={() => {
+            handleRemove(confirmDelete.tool, confirmDelete.name);
+            setConfirmDelete(null);
+          }}
+          onCancel={() => setConfirmDelete(null)}
         />
       )}
     </div>

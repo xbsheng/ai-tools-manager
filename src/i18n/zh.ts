@@ -104,7 +104,13 @@ export const zh: Record<TranslationKey, string> = {
   userInvokable: "用户可调用",
   revealInFinder: "在文件浏览器中打开",
 
+  // Search
+  searchServers: "搜索服务器...",
+  searchSkills: "搜索技能...",
+  noSearchResults: "未找到「{query}」的结果",
+
   // Confirm & Toast
+  loadFailed: "加载数据失败",
   confirm: "确认",
   confirmDeleteServer: "删除「{name}」？将从所有工具中移除。",
   confirmDeleteSkill: "删除「{name}」？将从所有工具中移除。",
