@@ -28,6 +28,8 @@ export const en = {
   removeFrom: "Remove from {tool}",
   addTo: "Add to {tool}",
   deleteServer: "Delete server",
+  copyAsJson: "Copy as JSON",
+  copied: "Copied!",
 
   // SyncPanel
   syncTitle: "Sync MCP Servers",

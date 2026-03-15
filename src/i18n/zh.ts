@@ -30,6 +30,8 @@ export const zh: Record<TranslationKey, string> = {
   removeFrom: "从 {tool} 移除",
   addTo: "添加到 {tool}",
   deleteServer: "删除服务器",
+  copyAsJson: "复制为 JSON",
+  copied: "已复制!",
 
   // SyncPanel
   syncTitle: "同步 MCP 服务器",

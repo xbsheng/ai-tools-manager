@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { Server, Trash2, Plus, Check, Edit2 } from "lucide-react";
+import { Server, Trash2, Plus, Check, Edit2, Copy, CheckCheck } from "lucide-react";
 import {
   ToolConfig,
   TOOL_LABELS,
@@ -31,6 +31,7 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingServer, setEditingServer] = useState<EditingServer | null>(null);
   const [registryServers, setRegistryServers] = useState<McpServer[]>([]);
+  const [copiedServer, setCopiedServer] = useState<string | null>(null);
   const t = useI18n();
 
   const loadRegistry = useCallback(async () => {
@@ -134,6 +135,22 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
     setShowForm(true);
   };
 
+  const handleCopy = async (server: UnifiedServer) => {
+    const config: Record<string, unknown> = {};
+    if (server.command) {
+      config.command = server.command;
+      if (server.args.length > 0) config.args = server.args;
+    } else if (server.url) {
+      config.url = server.url;
+    }
+    if (Object.keys(server.env).length > 0) config.env = server.env;
+
+    const json = JSON.stringify({ [server.name]: config }, null, 2);
+    await navigator.clipboard.writeText(json);
+    setCopiedServer(server.name);
+    setTimeout(() => setCopiedServer(null), 2000);
+  };
+
   const handleServerAdded = async () => {
     setShowForm(false);
     setEditingServer(null);
@@ -219,6 +236,17 @@ export function ServerList({ tools, onRefresh }: ServerListProps) {
                 </div>
 
                 <div className="flex items-center gap-1 ml-3 shrink-0">
+                  <button
+                    onClick={() => handleCopy(server)}
+                    className={`p-1.5 rounded-lg transition-all duration-200 ${
+                      copiedServer === server.name
+                        ? "opacity-100 text-green-400"
+                        : "opacity-0 group-hover:opacity-100 hover:bg-accent/15 text-text-secondary hover:text-accent"
+                    }`}
+                    title={copiedServer === server.name ? t("copied") : t("copyAsJson")}
+                  >
+                    {copiedServer === server.name ? <CheckCheck size={15} /> : <Copy size={15} />}
+                  </button>
                   <button
                     onClick={() => handleEdit(server)}
                     className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-accent/15 text-text-secondary hover:text-accent transition-all duration-200"
