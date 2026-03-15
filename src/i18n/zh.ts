@@ -8,11 +8,11 @@ export const zh: Record<TranslationKey, string> = {
   appName: "ATM",
   appDescription: "AI 工具管理器",
   statsTools: "工具",
-  statsServers: "服务器",
+  statsServers: "MCP",
 
   // Navigation
   navTools: "工具",
-  navServers: "服务器",
+  navServers: "MCP",
   navSync: "同步",
   navSettings: "设置",
 

@@ -6,11 +6,11 @@ export const en = {
   appName: "ATM",
   appDescription: "AI Tools Manager",
   statsTools: "Tools",
-  statsServers: "Servers",
+  statsServers: "MCP",
 
   // Navigation
   navTools: "Tools",
-  navServers: "Servers",
+  navServers: "MCP",
   navSync: "Sync",
   navSettings: "Settings",
 

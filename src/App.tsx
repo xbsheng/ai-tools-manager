@@ -32,7 +32,7 @@ export default function App() {
 
   const t = useI18n();
   const installedTools = tools.filter((t) => t.installed);
-  const totalServers = tools.reduce((sum, t) => sum + t.servers.length, 0);
+  const totalServers = new Set(tools.flatMap((t) => t.servers.map((s) => s.name))).size;
 
   return (
     <Layout
