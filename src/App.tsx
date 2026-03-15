@@ -140,7 +140,7 @@ export default function App() {
         <>
           {view === "tools" && <ToolList tools={tools} onRefresh={refresh} showToast={showToast} />}
           {view === "servers" && (
-            <ServerList tools={tools} onRefresh={refresh} showToast={showToast} newServerTrigger={newServerTrigger} />
+            <ServerList tools={tools} onRefresh={refresh} showToast={showToast} newServerTrigger={newServerTrigger} onNewServerConsumed={() => setNewServerTrigger(0)} />
           )}
           {view === "skills" && (
             <SkillList skillConfigs={skillConfigs} onRefresh={refreshSkills} showToast={showToast} />

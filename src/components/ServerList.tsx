@@ -20,6 +20,7 @@ interface ServerListProps {
   onRefresh: () => void;
   showToast: (type: ToastData["type"], message: string) => void;
   newServerTrigger?: number;
+  onNewServerConsumed?: () => void;
 }
 
 interface UnifiedServer {
@@ -31,7 +32,7 @@ interface UnifiedServer {
   tools: AiTool[];
 }
 
-export function ServerList({ tools, onRefresh, showToast, newServerTrigger }: ServerListProps) {
+export function ServerList({ tools, onRefresh, showToast, newServerTrigger, onNewServerConsumed }: ServerListProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingServer, setEditingServer] = useState<EditingServer | null>(null);
   const [registryServers, setRegistryServers] = useState<McpServer[]>([]);
@@ -57,8 +58,9 @@ export function ServerList({ tools, onRefresh, showToast, newServerTrigger }: Se
   useEffect(() => {
     if (newServerTrigger && newServerTrigger > 0) {
       setShowForm(true);
+      onNewServerConsumed?.();
     }
-  }, [newServerTrigger]);
+  }, [newServerTrigger, onNewServerConsumed]);
 
   const installedTools = useMemo(
     () => tools.filter((t) => t.installed),
