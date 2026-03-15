@@ -42,6 +42,8 @@ export const en = {
   skippedExists: "Skipped (already exists)",
   conflicts: "Conflicts",
   nothingToSync: "Nothing to sync",
+  syncSuccess: "Sync completed successfully",
+  syncFailed: "Sync failed: {error}",
 
   // SettingsPanel
   settings: "Settings",

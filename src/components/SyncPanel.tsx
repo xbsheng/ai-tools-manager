@@ -17,9 +17,10 @@ import { useI18n } from "../i18n";
 interface SyncPanelProps {
   tools: ToolConfig[];
   onRefresh: () => void;
+  showToast: (type: "success" | "error", message: string) => void;
 }
 
-export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
+export function SyncPanel({ tools, onRefresh, showToast }: SyncPanelProps) {
   const installed = tools.filter((t) => t.installed);
   const [source, setSource] = useState<AiTool | "">(
     installed[0]?.tool || "",
@@ -44,8 +45,9 @@ export function SyncPanel({ tools, onRefresh }: SyncPanelProps) {
       const res = await syncServers(source, Array.from(targets));
       setResult(res);
       onRefresh();
+      showToast("success", t("syncSuccess"));
     } catch (e) {
-      console.error("Sync failed:", e);
+      showToast("error", t("syncFailed", { error: String(e) }));
     } finally {
       setSyncing(false);
     }

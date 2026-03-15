@@ -88,7 +88,7 @@ export default function App() {
           {view === "skills" && (
             <SkillList skillConfigs={skillConfigs} onRefresh={refreshSkills} showToast={showToast} />
           )}
-          {view === "sync" && <SyncPanel tools={tools} onRefresh={refresh} />}
+          {view === "sync" && <SyncPanel tools={tools} onRefresh={refresh} showToast={showToast} />}
           {view === "settings" && <SettingsPanel />}
         </>
       )}

@@ -44,6 +44,8 @@ export const zh: Record<TranslationKey, string> = {
   skippedExists: "已跳过（已存在）",
   conflicts: "冲突",
   nothingToSync: "无需同步",
+  syncSuccess: "同步完成",
+  syncFailed: "同步失败：{error}",
 
   // SettingsPanel
   settings: "设置",
